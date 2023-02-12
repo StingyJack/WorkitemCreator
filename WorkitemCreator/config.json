@@ -1,0 +1,35 @@
+{
+  "ServiceUrl": "http://localhost:8080/tfs",
+  "IncludeStoryNumberInTaskTitle": false,
+  "Templates": [
+    {
+      "Name": "Standard User Story",
+      "WorkitemType": "UserStory",
+      "Title": "Add a feature",
+      "Description": "This is a standard user story with development and testing tasks",
+      "Children": [
+        {
+          "Name": "Dev Task",
+          "WorkitemType": "Task",
+          "Title": "Development",
+          "Description": "Do the programming",
+          "Properties": {
+            "Activity": "Development",
+            "RemainingTime": "8"
+          }
+        },
+        {
+          "Name": "Test Task",
+          "WorkitemType": "Task",
+          "Title": "Testing",
+          "Description": "Do the testing",
+          "Properties": {
+            "Activity": "Testing",
+            "RemainingTime": "4"
+          }
+        }
+      ],
+      "Properties": {}
+    }
+  ]
+}

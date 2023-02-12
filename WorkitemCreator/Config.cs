@@ -2,22 +2,24 @@
 {
     using System;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
-    class WorkitemTemplates
+    public class Config
     {
         public List<WorkitemTemplate> Templates { get; set; }
         public string ServiceUrl { get; set; }
     }
 
-
-    enum WorkitemType
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum WorkitemType
     {
         Unknown,
         UserStory,
         Task
     }
 
-    class WorkitemTemplate
+    public class WorkitemTemplate
     {
         public string Name { get; set; }
         public string Title { get; set; }

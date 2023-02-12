@@ -5,9 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WorkitemCreator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Workitem Creator" Height="600" Width="600">
     <Grid>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="145,355,0,0" VerticalAlignment="Top"/>
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MaxWidth="20"/>
+            <ColumnDefinition/>
+            <ColumnDefinition MaxWidth="20"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30"/>
+            <RowDefinition />
+            <RowDefinition MaxHeight="30"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+            <Label Content="Service Url:" HorizontalAlignment="Left"  VerticalAlignment="Center" />
+            <TextBox Name="ServiceUrl" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="3" MinWidth="300"></TextBox>
+        </StackPanel>
+        
+        <TabControl Grid.Row="2" Grid.Column="1" Name="WorkItemTemplates">
+            
+        </TabControl>
     </Grid>
 </Window>
