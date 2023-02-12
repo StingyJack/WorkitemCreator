@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WorkitemCreator"
         mc:Ignorable="d"
         Title="Workitem Creator" Height="600" Width="600">
     <Grid>
@@ -17,14 +16,26 @@
             <RowDefinition MaxHeight="30"/>
             <RowDefinition />
             <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
             <Label Content="Service Url:" HorizontalAlignment="Left"  VerticalAlignment="Center" />
-            <TextBox Name="ServiceUrl" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="3" MinWidth="300"></TextBox>
+            <TextBox Name="ServiceUrl" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="3" MinWidth="300" />
+            <Button Name="ConnectToAzDo" Content="Connect to AzDo" Margin="3" Padding="3" Click="ConnectToAzDo_Click"></Button>
         </StackPanel>
         
-        <TabControl Grid.Row="2" Grid.Column="1" Name="WorkItemTemplates">
-            
-        </TabControl>
+        <TabControl Grid.Row="2" Grid.Column="1" Name="WorkItemTemplates" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="1">
+            <Button Name="CreateWorkitems" Content="Create Workitem(s)" Margin="3" Padding="3" Click="CreateWorkitems_Click" IsEnabled="False"></Button>
+        </StackPanel>
+        <StatusBar Name="StatusBar" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="4">
+            <StatusBarItem MinWidth="50">
+                <Label Name="ConnectionState" Content="Not connected"></Label>
+            </StatusBarItem>
+            <StatusBarItem HorizontalContentAlignment="Stretch">
+                <Label Name="LastMessage" Content="Loading..."></Label>
+            </StatusBarItem>
+
+        </StatusBar>
     </Grid>
 </Window>

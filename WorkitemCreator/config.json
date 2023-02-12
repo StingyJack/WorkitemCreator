@@ -1,5 +1,5 @@
 {
-  "ServiceUrl": "http://localhost:8080/tfs",
+  "ServiceUrl": "https://astanton1978.visualstudio.com/",
   "IncludeStoryNumberInTaskTitle": false,
   "Templates": [
     {

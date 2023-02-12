@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -12,6 +13,7 @@
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
+    
     public enum WorkitemType
     {
         Unknown,
@@ -26,6 +28,6 @@
         public string Description { get; set; }
         public WorkitemType WorkitemType { get; set; }
         public List<WorkitemTemplate> Children { get; set; }
-        public Dictionary<string, string> Properties { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, string> Properties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }
 }

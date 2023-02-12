@@ -2,27 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Cryptography;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Data;
-    using System.Windows.Documents;
-    using System.Windows.Input;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using System.Windows.Navigation;
-    using System.Windows.Shapes;
 
     /// <summary>
     /// Interaction logic for WorkitemTemplateViewControl.xaml
     /// </summary>
-    public partial class WorkitemTemplateViewControl : UserControl
+    public partial class WorkitemTemplateViewControl
     {
-        private readonly WorkitemTemplate _workitemTemplate;
-
         internal WorkitemTemplateViewControl()
         {
             InitializeComponent();
@@ -31,11 +17,11 @@
 
         internal WorkitemTemplateViewControl(WorkitemTemplate workitemTemplate) : this()
         {
-            _workitemTemplate = workitemTemplate ?? throw new ArgumentNullException(nameof(workitemTemplate));
-            TemplateName.Text = _workitemTemplate.Name;
-            Title.Text = _workitemTemplate.Title;
-            Description.Text = _workitemTemplate.Description;
-            WorkitemType.ItemsSource = Enum.GetValues<WorkitemType>();
+            var workitemTemplate1 = workitemTemplate ?? throw new ArgumentNullException(nameof(workitemTemplate));
+            TemplateName.Text = workitemTemplate1.Name;
+            Title.Text = workitemTemplate1.Title;
+            Description.Text = workitemTemplate1.Description;
+            WorkitemType.ItemsSource = Enum.GetValues(typeof(WorkitemType));
             WorkitemType.SelectedItem = workitemTemplate.WorkitemType;
 
             WorkItemChildren.Items.Clear();

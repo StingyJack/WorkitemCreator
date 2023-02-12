@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.8": {
+      "Microsoft.VisualStudio.Services.Client": {
+        "type": "Direct",
+        "requested": "[15.131.1, )",
+        "resolved": "15.131.1",
+        "contentHash": "QkF7dZ+8/NZkimoM5I+ul1jwaZLJh1kUQ9wWBV0DVuUWuzoi4a0LHudKdGHK0wg3sE/uuUPOHjNAv1jdqgTGJw==",
+        "dependencies": {
+          "Microsoft.AspNet.WebApi.Client": "5.2.3",
+          "Newtonsoft.Json": "9.0.1"
+        }
+      },
+      "Microsoft.VisualStudio.Services.InteractiveClient": {
+        "type": "Direct",
+        "requested": "[15.131.1, )",
+        "resolved": "15.131.1",
+        "contentHash": "SJQnJ3vXO6mGNIEUwYljEQzAPPo1EfNS0y2kiu3xOv7LT++bfZylsE3khKwWLJAyrcopyz5Q7i+hUChGNwDRZw==",
+        "dependencies": {
+          "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.17.2",
+          "Microsoft.IdentityModel.Logging": "1.1.5",
+          "Microsoft.IdentityModel.Tokens": "5.1.5",
+          "Microsoft.VisualStudio.Services.Client": "[15.131.1]",
+          "Newtonsoft.Json": "9.0.1",
+          "System.IdentityModel.Tokens.Jwt": "5.1.5",
+          "WindowsAzure.ServiceBus": "3.3.2"
+        }
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.2, )",
+        "resolved": "13.0.2",
+        "contentHash": "R2pZ3B0UjeyHShm9vG+Tu0EBb2lC8b0dFzV9gVn50ofHXh9Smjk6kTn7A/FdAsC8B5cKib1OnGYOXxRBz5XQDg=="
+      },
+      "Microsoft.AspNet.WebApi.Client": {
+        "type": "Transitive",
+        "resolved": "5.2.3",
+        "contentHash": "3kiI8peSXbXHDDrRuo+QaX0iCEVRe0nvn2dBDRw656uPX32UalbBlSIDUDlJxu05eau4tnuhsikiUuugvvoUoQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        }
+      },
+      "Microsoft.IdentityModel.Clients.ActiveDirectory": {
+        "type": "Transitive",
+        "resolved": "3.17.2",
+        "contentHash": "aJinZQ8+48DSdN521xo1jRVXWmyoJIggq6mygBis/QAqiWwe/nZ4U21JfsYJMGdyu0NpGCDuyKUQOCod1EoA0A=="
+      },
+      "Microsoft.IdentityModel.Logging": {
+        "type": "Transitive",
+        "resolved": "1.1.5",
+        "contentHash": "cDarc2eVVJUU69FhepWYs/ZmHkwTPnNnSvSct7FMKeHpukVARNdmEQ7wKZB/l3QjMo42ioI0meVZ/ASrEymY6w=="
+      },
+      "Microsoft.IdentityModel.Tokens": {
+        "type": "Transitive",
+        "resolved": "5.1.5",
+        "contentHash": "cYh3lKy/N0X4l1LfqRzjTC7Vq+SYGCv4ZopiTJ3Pglb4CGW8ZI/K8Q6MOz83YHq00lgPuJPVuykPP4Btr5CDXA==",
+        "dependencies": {
+          "Microsoft.IdentityModel.Logging": "1.1.5",
+          "Newtonsoft.Json": "9.0.1"
+        }
+      },
+      "System.IdentityModel.Tokens.Jwt": {
+        "type": "Transitive",
+        "resolved": "5.1.5",
+        "contentHash": "S3XfQSoC5e9VYcvjyQk0MkWFDGYJQjrHRkRxwTTdoCqbeXs1q61VAYDVeXi9JjGHeDw5eROwARoboL7b9SRb+Q==",
+        "dependencies": {
+          "Microsoft.IdentityModel.Tokens": "5.1.5"
+        }
+      },
+      "WindowsAzure.ServiceBus": {
+        "type": "Transitive",
+        "resolved": "3.3.2",
+        "contentHash": "u1l+SaQ1Ao+55iLrGhn3JsIws6Y6ERQCU9uuwhs6JCoqPZ0o2r3kCAnzW/bCCWlLYbJc1GVSQF8kM3ws/QUysg=="
+      }
+    },
+    ".NETFramework,Version=v4.8/win7-x86": {}
+  }
+}
