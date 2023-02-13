@@ -3,9 +3,10 @@
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
-    using System.ServiceModel.Configuration;
+    using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.VisualStudio.Services.Client;
     using Microsoft.VisualStudio.Services.Common;
     using Microsoft.VisualStudio.Services.WebApi;
@@ -83,14 +84,73 @@
             }
 
             ConnectionState.Content = "Connected";
-            WriteStatus($"Connected to AzDo server");
-            CreateWorkitems.IsEnabled = true;
+            WriteStatus("Connected to AzDo server");
+
+            var projectCollectionClient = _vssConnection.GetClient<ProjectCollectionHttpClient>();
+            var projectCollections = await projectCollectionClient.GetProjectCollections();
+            foreach (var pc in projectCollections.OrderBy(p => p.Name))
+            {
+                TeamProjectCollectionList.Items.Add(pc.Name);
+                if (string.IsNullOrWhiteSpace(_config.LastSelectedTeamProjectCollection) == false
+                    && string.Equals(pc.Name, _config.LastSelectedTeamProjectCollection, StringComparison.OrdinalIgnoreCase))
+                {
+                    TeamProjectCollectionList.SelectedItem = pc.Name;
+                }
+            }
+
+            TeamProjectCollectionList.IsEnabled = true;
+            ConnectToAzDo.IsEnabled = false;
+            if (TeamProjectCollectionList.SelectedItem == null && TeamProjectCollectionList.Items.Count > 0)
+            {
+                TeamProjectCollectionList.SelectedIndex = 0;
+            }
+        }
+
+        private async void TeamProjectCollectionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var projectClient = _vssConnection.GetClient<ProjectHttpClient>();
+            var projects = await projectClient.GetProjects();
+            foreach (var p in projects)
+            {
+                TeamProjectList.Items.Add(p.Name);
+                if (string.IsNullOrWhiteSpace(_config.LastSelectedTeamProject) == false
+                    && string.Equals(p.Name, _config.LastSelectedTeamProject, StringComparison.OrdinalIgnoreCase))
+                {
+                    TeamProjectList.SelectedItem = p.Name;
+                }
+            }
+
+            TeamProjectList.IsEnabled = true;
+
+            if (TeamProjectList.SelectedItem == null && TeamProjectList.Items.Count > 0)
+            {
+                TeamProjectList.SelectedIndex = 0;
+            }
+
+        }
+
+        private void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            //read project workitems and compare with this template to see if the types are eligible
+
+            if (TeamProjectList.SelectedIndex >= 0)
+            {
+                CreateWorkitems.IsEnabled = true;
+            }
 
         }
 
         private void CreateWorkitems_Click(object sender, RoutedEventArgs e)
         {
+            var witvc = WorkItemTemplates.SelectedContent as WorkitemTemplateViewControl;
+            if (witvc == null)
+            {
+                WriteStatus("No template selected");
+                return;
+            }
 
+            var wit = witvc.AsTemplateDefinition();
         }
     }
 }

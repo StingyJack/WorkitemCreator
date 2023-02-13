@@ -1,5 +1,7 @@
 {
   "ServiceUrl": "https://astanton1978.visualstudio.com/",
+  "LastSelectedTeamProjectCollection": "",
+  "LastSelectedTeamProject": "",
   "IncludeStoryNumberInTaskTitle": false,
   "Templates": [
     {

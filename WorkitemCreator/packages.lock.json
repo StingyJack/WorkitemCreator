@@ -2,6 +2,18 @@
   "version": 1,
   "dependencies": {
     ".NETFramework,Version=v4.8": {
+      "Microsoft.TeamFoundationServer.Client": {
+        "type": "Direct",
+        "requested": "[15.131.1, )",
+        "resolved": "15.131.1",
+        "contentHash": "2ZKgcIhah3hgToLcIk4inKNV6Hi95Tb8F0kqO7Od7XSuLyMP+nLe8VsnoNMOZdvQCz8YOYVCKoYTnUWyzNPDsg==",
+        "dependencies": {
+          "Microsoft.AspNet.WebApi.Client": "5.2.3",
+          "Microsoft.TeamFoundation.DistributedTask.Common.Contracts": "[15.131.1]",
+          "Microsoft.VisualStudio.Services.Client": "[15.131.1]",
+          "Newtonsoft.Json": "9.0.1"
+        }
+      },
       "Microsoft.VisualStudio.Services.Client": {
         "type": "Direct",
         "requested": "[15.131.1, )",
@@ -58,6 +70,14 @@
         "dependencies": {
           "Microsoft.IdentityModel.Logging": "1.1.5",
           "Newtonsoft.Json": "9.0.1"
+        }
+      },
+      "Microsoft.TeamFoundation.DistributedTask.Common.Contracts": {
+        "type": "Transitive",
+        "resolved": "15.131.1",
+        "contentHash": "fJzw+zZysONFkuSPGjV6cJRryZx2RtOjIC77UYXkzMRKd27E8vty4yakmHPlO5xuPztZKCqEk64P+2t4DroFHw==",
+        "dependencies": {
+          "Microsoft.VisualStudio.Services.Client": "[15.131.1]"
         }
       },
       "System.IdentityModel.Tokens.Jwt": {
