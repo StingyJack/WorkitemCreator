@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Windows;
     using System.Windows.Controls;
 
     /// <summary>
@@ -25,6 +26,7 @@
             WorkitemType.SelectedItem = workitemTemplate.WorkitemType;
 
             WorkItemChildren.Items.Clear();
+            WorkItemChildren.Visibility = Visibility.Collapsed;
             foreach (var child in workitemTemplate.Children ?? new List<WorkitemTemplate>())
             {
                 var childControl = new WorkitemTemplateViewControl(child);
@@ -34,7 +36,9 @@
                     Content = childControl
                 };
                 WorkItemChildren.Items.Add(childTab);
+                WorkItemChildren.Visibility = Visibility.Visible;
             }
+            
         }
 
 
