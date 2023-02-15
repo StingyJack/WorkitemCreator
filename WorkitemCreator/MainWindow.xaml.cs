@@ -19,7 +19,7 @@
     public partial class MainWindow
     {
         private Config _config;
-        private VssConnection _vssConnection;
+        private ConnectionInfo _connectionInfo;
 
         public MainWindow()
         {
@@ -71,10 +71,10 @@
                 new VssFederatedCredential(false),
                 CredentialPromptType.PromptIfNeeded);
 
-            _vssConnection = new VssConnection(uri, creds);
+            var connection = new VssConnection(uri, creds);
             try
             {
-                await _vssConnection.ConnectAsync();
+                await connection.ConnectAsync();
             }
             catch (Exception ex)
             {
@@ -83,10 +83,12 @@
                 return;
             }
 
+            _connectionInfo = new ConnectionInfo(connection);
+
             ConnectionState.Content = "Connected";
             WriteStatus("Connected to AzDo server");
 
-            var projectCollectionClient = _vssConnection.GetClient<ProjectCollectionHttpClient>();
+            var projectCollectionClient = _connectionInfo.CurrentConnection.GetClient<ProjectCollectionHttpClient>();
             var projectCollections = await projectCollectionClient.GetProjectCollections();
             foreach (var pc in projectCollections.OrderBy(p => p.Name))
             {
@@ -104,11 +106,15 @@
             {
                 TeamProjectCollectionList.SelectedIndex = 0;
             }
+
+            _connectionInfo.ProjectCollectionName = TeamProjectCollectionList.SelectedItem?.ToString();
         }
 
         private async void TeamProjectCollectionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var projectClient = _vssConnection.GetClient<ProjectHttpClient>();
+            _connectionInfo.ProjectCollectionName = TeamProjectCollectionList.SelectedItem?.ToString();
+
+            var projectClient = _connectionInfo.CurrentConnection.GetClient<ProjectHttpClient>();
             var projects = await projectClient.GetProjects();
             foreach (var p in projects)
             {
@@ -127,10 +133,12 @@
                 TeamProjectList.SelectedIndex = 0;
             }
 
+            _connectionInfo.ProjectName = TeamProjectList.SelectedItem?.ToString();
         }
 
         private void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            _connectionInfo.ProjectName = TeamProjectList.SelectedItem?.ToString();
 
             //read project workitems and compare with this template to see if the types are eligible
 
@@ -138,10 +146,9 @@
             {
                 CreateWorkitems.IsEnabled = true;
             }
-
         }
 
-        private void CreateWorkitems_Click(object sender, RoutedEventArgs e)
+        private async void CreateWorkitems_Click(object sender, RoutedEventArgs e)
         {
             var witvc = WorkItemTemplates.SelectedContent as WorkitemTemplateViewControl;
             if (witvc == null)
@@ -151,6 +158,8 @@
             }
 
             var wit = witvc.AsTemplateDefinition();
+            var wm = new WorkitemMaker(_connectionInfo);
+            await wm.CreateWorkitemAsync(wit);
         }
     }
 }
