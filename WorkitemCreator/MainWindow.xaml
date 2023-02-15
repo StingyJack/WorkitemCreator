@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Workitem Creator" Height="640" Width="600" 
-        Background="NavajoWhite" FontFamily="Calibri" FontSize="15">
+        Background="#E6E6E8 " FontFamily="TimesNewRoman" FontSize="14">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MaxWidth="20"/>
@@ -28,7 +28,7 @@
         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
             <Label Content="Select Collection:"/>
             <ComboBox Name="TeamProjectCollectionList" MinWidth="150" IsEnabled="False" SelectionChanged="TeamProjectCollectionList_SelectionChanged"></ComboBox>
-            <Label Content="Select Team Project:"/>
+            <Label Content="Select Project:"/>
             <ComboBox Name="TeamProjectList" MinWidth="150" IsEnabled="False" SelectionChanged="TeamProjectList_SelectionChanged"></ComboBox>
         </StackPanel>
         
@@ -60,28 +60,41 @@
         </Style>
         <Style TargetType="TabControl">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="Background" Value="AntiqueWhite" />
+            <Setter Property="Background" Value="#D6D1CD" />
 
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="Background" Value="AntiqueWhite" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="#E5ECE9" />
 
         </Style>
         <Style TargetType="ComboBox">
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="AntiqueWhite" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="#D6D1CD" />
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="BurlyWood"/>
+                    <Setter Property="Background" Value="#564D4A"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
         <Style TargetType="Button">
-            <Setter Property="Background" Value="SandyBrown" />
+            <Setter Property="Background" Value="#D6D1CD" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="3" />
             <Setter Property="Padding" Value="3" />
         </Style>
     </Window.Resources>
 </Window>
+<!--
+Pallete
+#969A97  - Battleship Grey
+#D6D1CD - Timberwolf
+#E5ECE9 - Mint Creme
+#5B2333 - Wine
+#564D4A - walnut brown
+
+
+
+-->

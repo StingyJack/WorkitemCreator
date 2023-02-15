@@ -48,7 +48,8 @@
             {
                 Name = TemplateName.Text.Trim(),
                 Title = Title.Text.Trim(),
-                Description = Description.Text.Trim()
+                Description = Description.Text.Trim(),
+                WorkitemType = (WorkitemType)Enum.Parse(typeof(WorkitemType), WorkitemType.Text.Trim())
             };
             foreach (TabItem ti in WorkItemChildren.Items)
             {

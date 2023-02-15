@@ -32,6 +32,45 @@
         }
       ],
       "Properties": {}
+    },
+    {
+      "Name": "DB Script only User Story",
+      "WorkitemType": "UserStory",
+      "Title": "Fix the data",
+      "Description": "This is a user story for a specific production data fix",
+      "Children": [
+        {
+          "Name": "DBA Task",
+          "WorkitemType": "Task",
+          "Title": "Author the script",
+          "Description": "Make the script",
+          "Properties": {
+            "Activity": "Development",
+            "RemainingTime": "3"
+          }
+        },
+        {
+          "Name": "Test Task",
+          "WorkitemType": "Task",
+          "Title": "Testing",
+          "Description": "Test the script",
+          "Properties": {
+            "Activity": "Testing",
+            "RemainingTime": "1"
+          }
+        },
+        {
+          "Name": "Deploy Task",
+          "WorkitemType": "Task",
+          "Title": "Run the script",
+          "Description": "Execute the script",
+          "Properties": {
+            "Activity": "Deployment",
+            "RemainingTime": "1"
+          }
+        }
+      ],
+      "Properties": {}
     }
   ]
 }
