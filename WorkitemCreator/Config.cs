@@ -13,12 +13,4 @@
         public bool IncludeStoryNumberInTaskTitle { get; set; }
     }
 
-    [JsonConverter(typeof(StringEnumConverter))]
-    
-    public enum WorkitemType
-    {
-        Unknown,
-        UserStory,
-        Task
-    }
 }

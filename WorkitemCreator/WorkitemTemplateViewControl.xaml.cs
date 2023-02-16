@@ -14,15 +14,14 @@
         {
             InitializeComponent();
         }
-
-
+        
         internal WorkitemTemplateViewControl(WorkitemTemplate workitemTemplate) : this()
         {
             var workitemTemplate1 = workitemTemplate ?? throw new ArgumentNullException(nameof(workitemTemplate));
             TemplateName.Text = workitemTemplate1.Name;
             Title.Text = workitemTemplate1.Title;
             Description.Text = workitemTemplate1.Description;
-            WorkitemType.ItemsSource = Enum.GetValues(typeof(WorkitemType));
+            WorkitemType.ItemsSource = new List<string> { workitemTemplate.WorkitemType };
             WorkitemType.SelectedItem = workitemTemplate.WorkitemType;
 
             WorkItemChildren.Items.Clear();
@@ -38,9 +37,7 @@
                 WorkItemChildren.Items.Add(childTab);
                 WorkItemChildren.Visibility = Visibility.Visible;
             }
-            
         }
-
 
         public WorkitemTemplate AsTemplateDefinition()
         {
@@ -49,7 +46,7 @@
                 Name = TemplateName.Text.Trim(),
                 Title = Title.Text.Trim(),
                 Description = Description.Text.Trim(),
-                WorkitemType = (WorkitemType)Enum.Parse(typeof(WorkitemType), WorkitemType.Text.Trim())
+                WorkitemType = WorkitemType.Text.Trim()
             };
             foreach (TabItem ti in WorkItemChildren.Items)
             {
@@ -60,6 +57,16 @@
             }
 
             return returnValue;
+        }
+
+        public void UpdateWorkitemTypeList(List<string> workitemTypeList)
+        {
+            WorkitemType.ItemsSource = workitemTypeList;
+            foreach (TabItem ti in WorkItemChildren.Items)
+            {
+                var witvc = (WorkitemTemplateViewControl)ti.Content;
+                witvc.UpdateWorkitemTypeList(workitemTypeList);
+            }
         }
     }
 }

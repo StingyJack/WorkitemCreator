@@ -1,10 +1,11 @@
 ﻿namespace WorkitemCreator
 {
     using System;
-    using System.CodeDom;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
-    using Microsoft.VisualStudio.Services.WebApi;
+    using Microsoft.VisualStudio.Services.WebApi.Patch;
+    using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 
     public class WorkitemMaker
     {
@@ -21,35 +22,33 @@
 
             //is the type present for the project? (no User Story in Scrum, only PBI
 
-            //get fields, match them to the given properties
-
             var witc = _connectionInfo.CurrentConnection.GetClient<WorkItemTrackingHttpClient>();
             var projectWiTypes = await witc.GetWorkItemTypesAsync(_connectionInfo.ProjectName);
 
-            // get the paretnt template wi type
+            if (projectWiTypes.Any(p => string.Equals(wit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase)) == false)
+            {
+                throw new ArgumentException($"The workitem type {wit.WorkitemType} does not exist for project {_connectionInfo.ProjectName}");
+            }
+
+            // get the parent template wi type
             //use the .Fields on that to build the JsonPatchDocument 
             // create it, get reference to it
             // then create the child items being sure to reference back to the parent.
-
-            foreach (var wiType in projectWiTypes)
+            //needs some status reporting/logging in here
+            var parentWorkitemCandidate = new JsonPatchDocument
             {
-                WorkitemType parsedWiType;
-                if (Enum.TryParse(wiType.Name, out parsedWiType) == false)
+                new JsonPatchOperation
                 {
-                    continue;
+                    Operation = Operation.Add,
+                    Path = "/fields/System.Title",
+                    Value = wit.Title
                 }
+            };
 
-            
-
-
-            }
-
-            var fields = await witc.GetFieldsAsync(_connectionInfo.ProjectName);
+            var parentWorkitem = await witc.CreateWorkItemAsync(parentWorkitemCandidate, _connectionInfo.ProjectName, wit.WorkitemType);
 
 
             throw new NotImplementedException(nameof(wit));
         }
-
-
     }
 }

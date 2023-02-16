@@ -7,6 +7,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using Microsoft.TeamFoundation.Core.WebApi;
+    using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
     using Microsoft.VisualStudio.Services.Client;
     using Microsoft.VisualStudio.Services.Common;
     using Microsoft.VisualStudio.Services.WebApi;
@@ -136,11 +137,20 @@
             _connectionInfo.ProjectName = TeamProjectList.SelectedItem?.ToString();
         }
 
-        private void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _connectionInfo.ProjectName = TeamProjectList.SelectedItem?.ToString();
 
-            //read project workitems and compare with this template to see if the types are eligible
+            var witc = _connectionInfo.CurrentConnection.GetClient<WorkItemTrackingHttpClient>();
+            var wiTypes = await witc.GetWorkItemTypesAsync(_connectionInfo.ProjectName);
+
+            var wiTypeNames = wiTypes.Select(s => s.Name).OrderBy(o => o).ToList();
+            foreach (TabItem ti in WorkItemTemplates.Items)
+            {
+                var witvc = (WorkitemTemplateViewControl)ti.Content;
+                witvc.UpdateWorkitemTypeList(wiTypeNames);
+            }
+
 
             if (TeamProjectList.SelectedIndex >= 0)
             {

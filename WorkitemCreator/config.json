@@ -6,7 +6,7 @@
   "Templates": [
     {
       "Name": "Standard User Story",
-      "WorkitemType": "UserStory",
+      "WorkitemType": "User Story",
       "Title": "Add a feature",
       "Description": "This is a standard user story with development and testing tasks",
       "Children": [
@@ -35,7 +35,7 @@
     },
     {
       "Name": "DB Script only User Story",
-      "WorkitemType": "UserStory",
+      "WorkitemType": "User Story",
       "Title": "Fix the data",
       "Description": "This is a user story for a specific production data fix",
       "Children": [
