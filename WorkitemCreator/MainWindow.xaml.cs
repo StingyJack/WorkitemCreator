@@ -169,7 +169,9 @@
 
             var wit = witvc.AsTemplateDefinition();
             var wm = new WorkitemMaker(_connectionInfo);
-            await wm.CreateWorkitemAsync(wit);
+            var wiCreationResult = await wm.CreateWorkitemAsync(wit);
+
+            MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult), "Workitem Creation Result");
         }
     }
 }

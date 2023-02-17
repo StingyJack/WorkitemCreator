@@ -1,9 +1,6 @@
 ﻿namespace WorkitemCreator
 {
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public class WorkitemCreationResult
     {
@@ -12,7 +9,7 @@
         public List<string> Logs { get; set; } = new List<string>();
         public List<string> Errors { get; set; } = new List<string>();
 
-        public List<WorkitemBaseDetails> WorkitemsCreated { get; set; }
+        public List<WorkitemBaseDetails> WorkitemsCreated { get; set; } = new List<WorkitemBaseDetails>();
 
 
         public void SetFail(string errorMessage)

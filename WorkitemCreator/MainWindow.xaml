@@ -47,7 +47,7 @@
         </StatusBar>
     </Grid>
     <Window.Resources>
-        <!-- This window style doesnt work -->
+        <!-- This window style doesn't work -->
         <!--<Style TargetType="Window">
             <Setter Property="Background" Value="NavajoWhite" />
             <Setter Property="FontFamily" Value="Calibri" />
@@ -88,9 +88,9 @@
     </Window.Resources>
 </Window>
 <!--
-Pallete
+Palette
 #969A97  - Battleship Grey
-#D6D1CD - Timberwolf
+#D6D1CD - Timber wolf
 #E5ECE9 - Mint Creme
 #5B2333 - Wine
 #564D4A - walnut brown
