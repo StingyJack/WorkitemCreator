@@ -144,11 +144,10 @@
             var witc = _connectionInfo.CurrentConnection.GetClient<WorkItemTrackingHttpClient>();
             var wiTypes = await witc.GetWorkItemTypesAsync(_connectionInfo.ProjectName);
 
-            var wiTypeNames = wiTypes.Select(s => s.Name).OrderBy(o => o).ToList();
             foreach (TabItem ti in WorkItemTemplates.Items)
             {
                 var witvc = (WorkitemTemplateViewControl)ti.Content;
-                witvc.UpdateWorkitemTypeList(wiTypeNames);
+                witvc.UpdateWorkitemTypeList(wiTypes);
             }
 
 
@@ -167,11 +166,11 @@
                 return;
             }
 
-            var wit = witvc.AsTemplateDefinition();
+            var wit = witvc.AsTemplateDefinition(false);
             var wm = new WorkitemMaker(_connectionInfo);
             var wiCreationResult = await wm.CreateWorkitemAsync(wit);
 
-            MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult), "Workitem Creation Result");
+            MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
         }
     }
 }

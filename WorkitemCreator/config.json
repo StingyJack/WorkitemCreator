@@ -15,7 +15,7 @@
           "WorkitemType": "Task",
           "Title": "Development",
           "Description": "Do the programming",
-          "Properties": {
+          "AdditionalFields": {
             "Activity": "Development",
             "RemainingTime": "8"
           }
@@ -25,13 +25,15 @@
           "WorkitemType": "Task",
           "Title": "Testing",
           "Description": "Do the testing",
-          "Properties": {
+          "AdditionalFields": {
             "Activity": "Testing",
             "RemainingTime": "4"
           }
         }
       ],
-      "Properties": {}
+      "AdditionalFields": {
+        "AcceptanceCriteria" :  "To 'boldligo'"
+      }
     },
     {
       "Name": "DB Script only User Story",

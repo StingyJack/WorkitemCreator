@@ -21,11 +21,20 @@
         <Label Content="Title:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0"/>
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" x:Name="Title" Text="" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1" MinWidth="200" Margin="3"/>
         <Label Content="Type:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0"/>
-        <ComboBox HorizontalAlignment="Stretch" x:Name="WorkitemType" Text="" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" MinWidth="100" Margin="3"/>
+        <ComboBox HorizontalAlignment="Stretch" x:Name="WorkitemType" Text="" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" MinWidth="100" Margin="3" SelectionChanged="WorkitemType_SelectionChanged"/>
         <Label Content="Description:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0"/>
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description"  Grid.Row="3" Grid.Column="1" MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
-        
-        <TabControl Name="WorkItemChildren" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" />
+        <TabControl Name="Details" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" >
+            <TabItem Name="AdditionalFieldsTabItem" Header="Additional Fields">
+                <StackPanel Name="AdditionalFields" Orientation="Vertical">
+                   
+                </StackPanel>
+            </TabItem>
+            <TabItem Name="WorkitemChildrenTabItem" Header="Child Workitems">
+                <TabControl Name="WorkItemChildren"  />
+            </TabItem>
+        </TabControl>
+
 
 
     </Grid>
