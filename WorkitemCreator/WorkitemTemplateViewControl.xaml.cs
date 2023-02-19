@@ -132,6 +132,7 @@
 
         public void SetEligibleAdditionalFields(List<WorkItemTypeFieldInstance> workItemFields)
         {
+            
             foreach (AdditionalFieldAndValue afav in AdditionalFields.Children)
             {
                 var fav = afav.GetFieldAndValueFromDisplay();

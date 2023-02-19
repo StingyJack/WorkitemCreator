@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d" >
-    <Grid MinHeight="430" MinWidth="250">
+    <Grid MinHeight="430" MinWidth="250" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition MaxWidth="100" />
             <ColumnDefinition/>
@@ -14,7 +14,8 @@
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="100"/>
-            <RowDefinition />
+            <RowDefinition Height="*"/>
+            <RowDefinition MaxHeight="30"/>
         </Grid.RowDefinitions>
         <Label Content="Name:" HorizontalAlignment="Right"  VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="TemplateName" Text="" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" MinWidth="200" Margin="3"/>
@@ -26,8 +27,20 @@
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description"  Grid.Row="3" Grid.Column="1" MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
         <TabControl Name="Details" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" >
             <TabItem Name="AdditionalFieldsTabItem" Header="Additional Fields">
-                <StackPanel Name="AdditionalFields" Orientation="Vertical">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MaxWidth="150"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="70"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Field Name" FontStyle="Italic" Grid.Column="0" />
+                        <Label Content="Field Value" FontStyle="Italic" Grid.Column="1"/>
+                        <Label Content="Include" FontStyle="Italic" Grid.Column="2" ToolTip="When checked, this field value will be included when creating the work item"/>
+                    </Grid>
+                    <StackPanel Name="AdditionalFields" Orientation="Vertical">
                    
+                </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Name="WorkitemChildrenTabItem" Header="Child Workitems">

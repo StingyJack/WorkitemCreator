@@ -62,9 +62,13 @@
 
         </Style>
         <Style TargetType="{x:Type TabControl}">
+            <Setter Property="Margin" Value="0 10 0 10"></Setter>
             <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+
             <Setter Property="Background" Value="#D6D1CD" />
-            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <!--<Setter Property="OverridesDefaultStyle" Value="True" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -74,7 +78,6 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <!-- This inserts the button -> -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -93,8 +96,7 @@
                                           KeyboardNavigation.TabIndex="0"
                                           Background="Transparent" />
                             </Grid>
-                            <!-- <- This inserts the button -->
-                            <Border Name="Border"
+            <Border Name="Border"
                                     Grid.Row="1"
                                     Background="{StaticResource WindowBackgroundBrush}"
                                     BorderBrush="{StaticResource SolidBorderBrush}"
@@ -117,7 +119,7 @@
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
-            </Setter>
+            </Setter>-->
 
         </Style>
         <Style TargetType="TextBox">

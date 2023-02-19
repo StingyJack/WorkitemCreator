@@ -46,8 +46,8 @@
                 {
                     Header = template.Name,
                     Content = templateViewControl,
-                    HorizontalContentAlignment = HorizontalAlignment.Left,
-                    VerticalContentAlignment = VerticalAlignment.Top,
+                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                    VerticalContentAlignment = VerticalAlignment.Stretch,
                 };
                 WorkItemTemplates.Items.Add(childTab);
             }
@@ -149,8 +149,7 @@
                 var witvc = (WorkitemTemplateViewControl)ti.Content;
                 witvc.UpdateWorkitemTypeList(wiTypes);
             }
-
-
+            
             if (TeamProjectList.SelectedIndex >= 0)
             {
                 CreateWorkitems.IsEnabled = true;
