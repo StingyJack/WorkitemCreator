@@ -51,10 +51,10 @@
         </StatusBar>
     </Grid>
     <Window.Resources>
-        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFF" />
+        <!--<SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFF" />
         <SolidColorBrush x:Key="SolidBorderBrush" Color="#888" />
         <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888" />
-        <SolidColorBrush x:Key="DisabledBorderBrush" Color="#AAA" />
+        <SolidColorBrush x:Key="DisabledBorderBrush" Color="#AAA" />-->
 
         <Style TargetType="Label">
             <Setter Property="VerticalAlignment" Value="Center" />

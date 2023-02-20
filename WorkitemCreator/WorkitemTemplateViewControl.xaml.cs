@@ -33,13 +33,13 @@
             AdditionalFields.Children.Clear();
             foreach (var af in workitemTemplate.AdditionalFields.OrderBy(k => k.Key))
             {
-                var fav = new FieldAndValue
+                var afavm = new AdditionalFieldAndValueViewModel
                 {
                     FieldName = af.Key,
                     Value = af.Value,
                     IsEnabled = false
                 };
-                var afUserControl = new AdditionalFieldAndValue(fav);
+                var afUserControl = new AdditionalFieldAndValue(afavm);
                 AdditionalFields.Children.Add(afUserControl);
             }
 
@@ -132,7 +132,6 @@
 
         public void SetEligibleAdditionalFields(List<WorkItemTypeFieldInstance> workItemFields)
         {
-            
             foreach (AdditionalFieldAndValue afav in AdditionalFields.Children)
             {
                 var fav = afav.GetFieldAndValueFromDisplay();

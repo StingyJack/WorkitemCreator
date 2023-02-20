@@ -7,43 +7,50 @@
     /// </summary>
     public partial class AdditionalFieldAndValue
     {
-        public FieldAndValue FieldAndValue { get; }
+
+        
+        public AdditionalFieldAndValueViewModel ViewModel { get; }
 
         private AdditionalFieldAndValue()
         {
             InitializeComponent();
         }
 
-        public AdditionalFieldAndValue(FieldAndValue fieldAndValue) : this()
+        public AdditionalFieldAndValue(AdditionalFieldAndValueViewModel fieldAndValueViewModel) : this()
         {
             
-            FieldAndValue = fieldAndValue ?? throw new ArgumentNullException(nameof(fieldAndValue));
-            DataContext = fieldAndValue;
-            //FieldName.Content = fieldAndValue.FieldName;
-            //FieldValue.Text = fieldAndValue.Value;
-            //FieldIsEnabled.IsChecked = fieldAndValue.IsEnabled;
-            //FieldIsEligible.IsChecked = fieldAndValue.IsEligible; 
+            ViewModel = fieldAndValueViewModel ?? throw new ArgumentNullException(nameof(fieldAndValueViewModel));
+            DataContext = fieldAndValueViewModel;
+            //FieldName.Content = fieldAndValueViewModel.FieldName;
+            //FieldValue.Text = fieldAndValueViewModel.Value;
+            //FieldIsEnabled.IsChecked = fieldAndValueViewModel.IsEnabled;
+            //FieldIsEligible.IsChecked = fieldAndValueViewModel.IsEligible; 
         }
 
         public FieldAndValue GetFieldAndValueFromDisplay()
         {
-            //var fieldAndValue = new FieldAndValue
+            //var fieldAndValueViewModel = new ViewModel
             //{
             //    FieldName = FieldName.Content.ToString(),
             //    Value = FieldValue.Text.Trim(),
             //    IsEnabled = FieldIsEnabled.IsChecked.GetValueOrDefault(false),
             //    IsEligible = FieldIsEligible.IsChecked.GetValueOrDefault(false)
             //};
-            //return fieldAndValue;
+            //return fieldAndValueViewModel;
 
-            return FieldAndValue;
+            return ViewModel;
+        }
+
+        public void SetAvailableFields(List<WorkItemTypeFieldInstance> availableFields)
+        {
+            ViewModel.AvailableFields = availableFields;
         }
 
         public void SetIsEligible(bool isEligible)
         {
             //This control is hidden from the user
             //FieldIsEligible.IsChecked = isEligible;
-            FieldAndValue.IsEligible = isEligible;
+            ViewModel.IsEligible = isEligible;
         }
     }
 }

@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WorkitemCreator"
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="400">
     <Grid>
@@ -12,9 +11,12 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="25"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalContentAlignment="Right" Content="{Binding Path=FieldName, Mode=OneWay}" Name="FieldName"/>
-        <TextBox Name="FieldValue" HorizontalAlignment="Stretch" Text="{Binding Path=Value, Mode=TwoWay}" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
-                 IsEnabled="{Binding Path=IsEligible, Mode=OneWay}"/>
+        <ComboBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalContentAlignment="Right" 
+                  SelectedItem="{Binding Path=FieldName, Mode=TwoWay}"
+                  ItemsSource="{Binding Path=AvailableFields}"
+                  Name="FieldName"/>
+        <TextBox Name="FieldValue" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
+                 IsEnabled="{Binding Path=IsEligible, Mode=OneWay}" Text="{Binding Path=Value, Mode=TwoWay}"/>
         <CheckBox Name="FieldIsEnabled" MaxWidth="20" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Margin="0 0 5 0" IsChecked="{Binding Path=IsEnabled, Mode=TwoWay}" />
         <CheckBox Name="FieldIsEligible" Visibility="Collapsed" Grid.Row="0" Grid.Column="2" IsChecked="{Binding Path=IsEligible, Mode=TwoWay}" />
     </Grid>

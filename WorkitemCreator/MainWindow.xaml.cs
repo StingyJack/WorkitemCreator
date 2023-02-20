@@ -2,7 +2,6 @@
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
@@ -19,25 +18,21 @@
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public partial class MainWindow
     {
-        private Config _config;
+        private readonly Config _config;
         private ConnectionInfo _connectionInfo;
 
-        public MainWindow()
+        public MainWindow(Config config)
         {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
             InitializeComponent();
+
             LoadTemplates();
         }
 
         public void LoadTemplates()
         {
-            if (File.Exists("config.json") == false)
-            {
-                return;
-            }
-
             WorkItemTemplates.Items.Clear();
-            var configContents = File.ReadAllText("config.json");
-            _config = JsonConvert.DeserializeObject<Config>(configContents);
+            
             ServiceUrl.Text = _config.ServiceUrl;
             foreach (var template in _config.Templates)
             {
