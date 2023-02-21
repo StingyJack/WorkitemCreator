@@ -90,19 +90,19 @@
 
             foreach (AdditionalFieldAndValue afav in AdditionalFields.Children)
             {
-                var fav = afav.GetFieldAndValueFromDisplay();
-                if (fav.IsEligible == false)
+                var viewModel = afav.ViewModel;
+                if (viewModel.IsEligible == false)
                 {
                     continue;
                 }
 
-                if (forSavingOnly == false && fav.IsEnabled == false)
+                if (forSavingOnly == false && viewModel.IsEnabled == false)
                 {
                     continue; 
                 }
                 
 
-                returnValue.AdditionalFields.Add(fav.FieldName, fav.Value);
+                returnValue.AdditionalFields.Add(viewModel.FieldName, viewModel.Value);
             }
 
             foreach (TabItem ti in WorkItemChildren.Items)
@@ -128,21 +128,26 @@
                 var witvc = (WorkitemTemplateViewControl)ti.Content;
                 witvc.UpdateWorkitemTypeList(workitemTypes);
             }
+
+            
+
         }
 
         public void SetEligibleAdditionalFields(List<WorkItemTypeFieldInstance> workItemFields)
         {
             foreach (AdditionalFieldAndValue afav in AdditionalFields.Children)
             {
-                var fav = afav.GetFieldAndValueFromDisplay();
-                var wiField = workItemFields.FirstOrDefault(f => f.Name.Equals(fav.FieldName, StringComparison.OrdinalIgnoreCase));
+                var viewModel = afav.ViewModel;
+                var wiField = workItemFields.FirstOrDefault(f => f.Name.Equals(viewModel.FieldName, StringComparison.OrdinalIgnoreCase));
                 if (wiField == null)
                 {
-                    afav.SetIsEligible(false);
+                    viewModel.IsEligible = false;
                     continue;
                 }
 
-                afav.SetIsEligible(true);
+                viewModel.AllFields = workItemFields;
+
+                viewModel.IsEligible = true;
             }
         }
 

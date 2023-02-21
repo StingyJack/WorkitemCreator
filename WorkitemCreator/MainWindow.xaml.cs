@@ -148,6 +148,7 @@
             if (TeamProjectList.SelectedIndex >= 0)
             {
                 CreateWorkitems.IsEnabled = true;
+                WorkItemTemplates.IsEnabled = true;
             }
         }
 
