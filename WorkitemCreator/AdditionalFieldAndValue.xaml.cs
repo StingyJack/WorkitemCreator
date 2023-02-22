@@ -25,7 +25,7 @@
             }
             //FieldName.Content = fieldAndValueViewModel.FieldName;
             //FieldValue.Text = fieldAndValueViewModel.Value;
-            //FieldIsEnabled.IsChecked = fieldAndValueViewModel.IsEnabled;
+            //FieldIsEnabled.IsChecked = fieldAndValueViewModel.IncludeWhenCreating;
             //FieldIsEligible.IsChecked = fieldAndValueViewModel.IsEligible; 
         }
         

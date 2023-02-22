@@ -37,7 +37,7 @@
                 {
                     FieldName = af.Key,
                     Value = af.Value,
-                    IsEnabled = false
+                    IncludeWhenCreating = false
                 };
                 var afUserControl = new AdditionalFieldAndValue(afavm);
                 AdditionalFields.Children.Add(afUserControl);
@@ -96,7 +96,7 @@
                     continue;
                 }
 
-                if (forSavingOnly == false && viewModel.IsEnabled == false)
+                if (forSavingOnly == false && viewModel.IncludeWhenCreating == false)
                 {
                     continue; 
                 }

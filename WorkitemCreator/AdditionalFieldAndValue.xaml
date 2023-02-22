@@ -23,7 +23,7 @@
                   x:Name="FieldName"/>
         <TextBox x:Name="FieldValue" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
                  IsEnabled="{Binding IsEligible, Mode=OneWay}" Text="{Binding Value, Mode=TwoWay}"/>
-        <CheckBox x:Name="FieldIsEnabled" MaxWidth="20" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Margin="0 0 5 0" IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+        <CheckBox x:Name="FieldIsEnabled" MaxWidth="20" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Margin="0 0 5 0" IsChecked="{Binding IncludeWhenCreating, Mode=TwoWay}" />
         <CheckBox x:Name="FieldIsEligible" Visibility="Collapsed" Grid.Row="0" Grid.Column="2" IsChecked="{Binding IsEligible, Mode=TwoWay}" />
     </Grid>
 </UserControl>
