@@ -1,5 +1,6 @@
 ﻿namespace WorkitemCreator
 {
+    using System;
     using System.IO;
     using System.Windows;
     using Newtonsoft.Json;
@@ -19,6 +20,7 @@
 
             var configContents = File.ReadAllText("config.json");
             var config = JsonConvert.DeserializeObject<Config>(configContents);
+            config.CurrentLogFilePath = $".\\{nameof(WorkitemCreator)}.{DateTimeOffset.Now:yyyy.MM.dd.HH.mm.ss}.log";
             var main = new MainWindow(config);
 
             main.Show();

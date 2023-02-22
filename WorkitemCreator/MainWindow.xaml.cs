@@ -1,10 +1,13 @@
 ﻿namespace WorkitemCreator
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Shapes;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
     using Microsoft.VisualStudio.Services.Client;
@@ -31,8 +34,9 @@
 
         public void LoadTemplates()
         {
+            WriteStatus("Loading templates from config");
             WorkItemTemplates.Items.Clear();
-            
+
             ServiceUrl.Text = _config.ServiceUrl;
             foreach (var template in _config.Templates)
             {
@@ -46,15 +50,22 @@
                 };
                 WorkItemTemplates.Items.Add(childTab);
             }
+            WriteStatus("Templates loaded from config");
+
         }
 
         private void WriteStatus(string message)
         {
-            LastMessage.Content = $"{DateTime.Now:HH:mm:ss} - {message}";
+            var line = $"{DateTime.Now:HH:mm:ss} - {message}";
+            LastMessage.Content = line;
+            File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
         }
 
         private void ReportError(string errorMessage, string title)
         {
+            var line = $"{DateTime.Now:HH:mm:ss} - {title} {errorMessage}";
+            File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
+
             MessageBox.Show(errorMessage, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
@@ -85,7 +96,9 @@
             WriteStatus("Connected to AzDo server");
 
             var projectCollectionClient = _connectionInfo.CurrentConnection.GetClient<ProjectCollectionHttpClient>();
-            var projectCollections = await projectCollectionClient.GetProjectCollections();
+            WriteStatus("Getting project collections");
+            var projectCollections = (await projectCollectionClient.GetProjectCollections()).ToList();
+            WriteStatus($"Got {projectCollections.Count} project collections");
             foreach (var pc in projectCollections.OrderBy(p => p.Name))
             {
                 TeamProjectCollectionList.Items.Add(pc.Name);
@@ -111,7 +124,9 @@
             _connectionInfo.ProjectCollectionName = TeamProjectCollectionList.SelectedItem?.ToString();
 
             var projectClient = _connectionInfo.CurrentConnection.GetClient<ProjectHttpClient>();
-            var projects = await projectClient.GetProjects();
+            WriteStatus("Getting available projects");
+            var projects = (await projectClient.GetProjects()).ToList();
+            WriteStatus($"Got {projects.Count} projects");
             foreach (var p in projects)
             {
                 TeamProjectList.Items.Add(p.Name);
@@ -144,7 +159,7 @@
                 var witvc = (WorkitemTemplateViewControl)ti.Content;
                 witvc.UpdateWorkitemTypeList(wiTypes);
             }
-            
+
             if (TeamProjectList.SelectedIndex >= 0)
             {
                 CreateWorkitems.IsEnabled = true;
