@@ -27,9 +27,6 @@
                     ToolTip="If you think this should be 'ADO' your noob is showing." />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
-            <Label Content="Select Collection:" />
-            <ComboBox Name="TeamProjectCollectionList" MinWidth="150" IsEnabled="False"
-                      SelectionChanged="TeamProjectCollectionList_SelectionChanged" />
             <Label Content="Select Project:" />
             <ComboBox Name="TeamProjectList" MinWidth="150" IsEnabled="False"
                       SelectionChanged="TeamProjectList_SelectionChanged" />

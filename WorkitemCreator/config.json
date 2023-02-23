@@ -1,5 +1,5 @@
 {
-  "ServiceUrl": "https://dev.azure.com/astanton1978Sandbox/",
+  "ServiceUrl": "http://andrewlap/DefaultCollection",
   "LastSelectedTeamProjectCollection": "",
   "LastSelectedTeamProject": "",
   "IncludeStoryNumberInTaskTitle": false,
@@ -32,7 +32,7 @@
         }
       ],
       "AdditionalFields": {
-        "AcceptanceCriteria" :  "To 'boldligo'"
+        "AcceptanceCriteria": "To 'boldligo'"
       }
     },
     {

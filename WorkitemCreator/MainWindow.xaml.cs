@@ -2,17 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Shapes;
-    using Microsoft.TeamFoundation.Core.WebApi;
-    using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
-    using Microsoft.VisualStudio.Services.Client;
-    using Microsoft.VisualStudio.Services.Common;
-    using Microsoft.VisualStudio.Services.WebApi;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -22,13 +17,13 @@
     public partial class MainWindow
     {
         private readonly Config _config;
-        private ConnectionInfo _connectionInfo;
+        private readonly AzDoService _azDoService;
 
         public MainWindow(Config config)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
+            _azDoService = new AzDoService();
             InitializeComponent();
-
             LoadTemplates();
         }
 
@@ -36,27 +31,24 @@
         {
             WriteStatus("Loading templates from config");
             WorkItemTemplates.Items.Clear();
-
             ServiceUrl.Text = _config.ServiceUrl;
             foreach (var template in _config.Templates)
             {
                 var templateViewControl = new WorkitemTemplateViewControl(template);
                 var childTab = new TabItem
                 {
-                    Header = template.Name,
-                    Content = templateViewControl,
-                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                    VerticalContentAlignment = VerticalAlignment.Stretch,
+                    Header = template.Name, Content = templateViewControl, HorizontalContentAlignment = HorizontalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Stretch,
                 };
                 WorkItemTemplates.Items.Add(childTab);
             }
-            WriteStatus("Templates loaded from config");
 
+            WriteStatus("Templates loaded from config");
         }
 
         private void WriteStatus(string message)
         {
             var line = $"{DateTime.Now:HH:mm:ss} - {message}";
+            Trace.TraceInformation(line);
             LastMessage.Content = line;
             File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
         }
@@ -71,63 +63,23 @@
 
         private async void ConnectToAzDo_Click(object sender, RoutedEventArgs e)
         {
-            WriteStatus("Connecting...");
-            var uri = new Uri(_config.ServiceUrl);
+            var serviceUrl = ServiceUrl.Text.Trim();
+            WriteStatus($"Connecting to {serviceUrl}...");
 
-            var creds = new VssClientCredentials(new WindowsCredential(false),
-                new VssFederatedCredential(false),
-                CredentialPromptType.PromptIfNeeded);
-
-            var connection = new VssConnection(uri, creds);
-            try
+            var connResult = _azDoService.Connect(serviceUrl);
+            if (connResult.IsConnected == false)
             {
-                await connection.ConnectAsync();
-            }
-            catch (Exception ex)
-            {
-                WriteStatus($"Failed to connect! {ex.Message}");
-                ReportError($"Error when connecting to Azure DevOps. \n{ex}", "Check your credentials and service url");
+                WriteStatus($"Unable to connect. {connResult.ConnectionError}");
                 return;
             }
 
-            _connectionInfo = new ConnectionInfo(connection);
-
             ConnectionState.Content = "Connected";
             WriteStatus("Connected to AzDo server");
-
-            var projectCollectionClient = _connectionInfo.CurrentConnection.GetClient<ProjectCollectionHttpClient>();
-            WriteStatus("Getting project collections");
-            var projectCollections = (await projectCollectionClient.GetProjectCollections()).ToList();
-            WriteStatus($"Got {projectCollections.Count} project collections");
-            foreach (var pc in projectCollections.OrderBy(p => p.Name))
-            {
-                TeamProjectCollectionList.Items.Add(pc.Name);
-                if (string.IsNullOrWhiteSpace(_config.LastSelectedTeamProjectCollection) == false
-                    && string.Equals(pc.Name, _config.LastSelectedTeamProjectCollection, StringComparison.OrdinalIgnoreCase))
-                {
-                    TeamProjectCollectionList.SelectedItem = pc.Name;
-                }
-            }
-
-            TeamProjectCollectionList.IsEnabled = true;
-            ConnectToAzDo.IsEnabled = false;
-            if (TeamProjectCollectionList.SelectedItem == null && TeamProjectCollectionList.Items.Count > 0)
-            {
-                TeamProjectCollectionList.SelectedIndex = 0;
-            }
-
-            _connectionInfo.ProjectCollectionName = TeamProjectCollectionList.SelectedItem?.ToString();
-        }
-
-        private async void TeamProjectCollectionList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _connectionInfo.ProjectCollectionName = TeamProjectCollectionList.SelectedItem?.ToString();
-
-            var projectClient = _connectionInfo.CurrentConnection.GetClient<ProjectHttpClient>();
+            
             WriteStatus("Getting available projects");
-            var projects = (await projectClient.GetProjects()).ToList();
-            WriteStatus($"Got {projects.Count} projects");
-            foreach (var p in projects)
+            var projectResult = await _azDoService.GetProjectsAsync();
+            WriteStatus($"Got {projectResult.Data.Count} projects");
+            foreach (var p in projectResult.Data.OrderBy(p => p.Name))
             {
                 TeamProjectList.Items.Add(p.Name);
                 if (string.IsNullOrWhiteSpace(_config.LastSelectedTeamProject) == false
@@ -138,26 +90,24 @@
             }
 
             TeamProjectList.IsEnabled = true;
+            ConnectToAzDo.IsEnabled = false;
 
-            if (TeamProjectList.SelectedItem == null && TeamProjectList.Items.Count > 0)
+            if (TeamProjectList.Items.Count > 0 && TeamProjectList.SelectedIndex < 0)
             {
                 TeamProjectList.SelectedIndex = 0;
             }
-
-            _connectionInfo.ProjectName = TeamProjectList.SelectedItem?.ToString();
         }
-
+        
         private async void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _connectionInfo.ProjectName = TeamProjectList.SelectedItem?.ToString();
+            _azDoService.ProjectName = TeamProjectList.SelectedItem?.ToString();
 
-            var witc = _connectionInfo.CurrentConnection.GetClient<WorkItemTrackingHttpClient>();
-            var wiTypes = await witc.GetWorkItemTypesAsync(_connectionInfo.ProjectName);
+            var wiTypeResult = await _azDoService.GetWorkItemTypesAsync();
 
             foreach (TabItem ti in WorkItemTemplates.Items)
             {
                 var witvc = (WorkitemTemplateViewControl)ti.Content;
-                witvc.UpdateWorkitemTypeList(wiTypes);
+                witvc.UpdateWorkitemTypeList(wiTypeResult.Data);
             }
 
             if (TeamProjectList.SelectedIndex >= 0)
@@ -177,7 +127,7 @@
             }
 
             var wit = witvc.AsTemplateDefinition(false);
-            var wm = new WorkitemMaker(_connectionInfo);
+            var wm = new WorkitemMaker(_azDoService);
             var wiCreationResult = await wm.CreateWorkitemAsync(wit);
 
             MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");

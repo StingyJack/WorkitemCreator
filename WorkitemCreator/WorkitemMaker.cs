@@ -4,18 +4,17 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Microsoft.VisualStudio.Services.WebApi.Patch;
     using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 
     public class WorkitemMaker
     {
-        private readonly ConnectionInfo _connectionInfo;
+        private readonly AzDoService _azDoService;
 
-        public WorkitemMaker(ConnectionInfo connectionInfo)
+        public WorkitemMaker(AzDoService azDoService)
         {
-            _connectionInfo = connectionInfo ?? throw new ArgumentNullException(nameof(connectionInfo));
+            _azDoService = azDoService ?? throw new ArgumentNullException(nameof(azDoService));
         }
 
         public async Task<WorkitemCreationResult> CreateWorkitemAsync(WorkitemTemplate wit)
@@ -24,12 +23,18 @@
 
             var returnValue = new WorkitemCreationResult();
 
-            var witc = _connectionInfo.CurrentConnection.GetClient<WorkItemTrackingHttpClient>();
-            var projectWiTypes = await witc.GetWorkItemTypesAsync(_connectionInfo.ProjectName);
-            var parentWiType = projectWiTypes.FirstOrDefault(p => string.Equals(wit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase));
+            var workitemTypesResult = await _azDoService.GetWorkItemTypesAsync();
+            if (workitemTypesResult.IsOk == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors.Add(workitemTypesResult.Errors);
+                return returnValue;
+            }
+
+            var parentWiType = workitemTypesResult.Data.FirstOrDefault(p => string.Equals(wit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase));
             if (parentWiType == null)
             {
-                returnValue.SetFail($"The parent workitem type {wit.WorkitemType} does not exist for project {_connectionInfo.ProjectName}");
+                returnValue.SetFail($"The parent workitem type {wit.WorkitemType} does not exist for project {_azDoService.ProjectName}");
                 return returnValue;
             }
 
@@ -42,8 +47,15 @@
             WorkItem parentWorkitem;
             try
             {
-                parentWorkitem = await witc.CreateWorkItemAsync(parentWorkitemCandidate, _connectionInfo.ProjectName, wit.WorkitemType);
-                if (parentWorkitem == null || parentWorkitem.Id.HasValue == false)
+                var parentWorkitemCreationResult = await _azDoService.CreateWorkitemAsync(parentWorkitemCandidate, wit.WorkitemType);
+                if (parentWorkitemCreationResult.IsOk == false)
+                {
+                    returnValue.SetFail(parentWorkitemCreationResult.Errors);
+                    return returnValue;
+                }
+
+                parentWorkitem = parentWorkitemCreationResult.Data;
+                if (parentWorkitem.Id.HasValue == false)
                 {
                     throw new InvalidOperationException("Parent workitem was not created.");
                 }
@@ -65,10 +77,10 @@
 
             foreach (var cwit in wit.Children)
             {
-                var wiType = projectWiTypes.FirstOrDefault(p => string.Equals(cwit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase));
+                var wiType = workitemTypesResult.Data.FirstOrDefault(p => string.Equals(cwit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase));
                 if (wiType == null)
                 {
-                    returnValue.SetFail($"The child workitem type {cwit.WorkitemType} does not exist for project {_connectionInfo.ProjectName}");
+                    returnValue.SetFail($"The child workitem type {cwit.WorkitemType} does not exist for project {_azDoService.ProjectName}");
                     return returnValue;
                 }
 
@@ -88,8 +100,15 @@
                 WorkItem childWorkitem;
                 try
                 {
-                    childWorkitem = await witc.CreateWorkItemAsync(childWorkItemCandidate, _connectionInfo.ProjectName, cwit.WorkitemType);
-                    if (childWorkitem == null || childWorkitem.Id.HasValue == false)
+                    var childWorkitemCreationResult = await _azDoService.CreateWorkitemAsync(childWorkItemCandidate, cwit.WorkitemType);
+                    if (childWorkitemCreationResult.IsOk == false)
+                    {
+                        returnValue.SetFail(childWorkitemCreationResult.Errors);
+                        return returnValue;
+                    }
+
+                    childWorkitem = childWorkitemCreationResult.Data; 
+                    if (childWorkitem.Id.HasValue == false)
                     {
                         throw new InvalidOperationException("Child workitem was not created.");
                     }
@@ -108,7 +127,7 @@
                     Uri = childWorkitem.Url,
                     Title = cwit.Title
                 });
-            }
+            } //next child
 
 
             returnValue.IsOk = true;
