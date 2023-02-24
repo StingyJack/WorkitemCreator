@@ -50,6 +50,7 @@
             var line = $"{DateTime.Now:HH:mm:ss} - {message}";
             Trace.TraceInformation(line);
             LastMessage.Content = line;
+            LastMessage.ToolTip = line;
             File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
         }
 

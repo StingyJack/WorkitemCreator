@@ -47,9 +47,6 @@
             {
                 returnValue.ConnectionError = ex.ToString();
                 _isConnected = false;
-
-                //WriteStatus($"Failed to connect! {ex.Message}");
-                //ReportError($"Error when connecting to Azure DevOps. \n{ex}", "Check your credentials and service url");
             }
 
             returnValue.IsConnected = _isConnected;

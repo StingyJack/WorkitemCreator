@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
@@ -16,10 +17,7 @@
 
         private List<WorkItemType> _workItemTypes = new List<WorkItemType>();
 
-        internal WorkitemTemplateViewControl()
-        {
-            InitializeComponent();
-        }
+        internal WorkitemTemplateViewControl() => InitializeComponent();
 
         internal WorkitemTemplateViewControl(WorkitemTemplate workitemTemplate) : this()
         {
@@ -33,12 +31,7 @@
             AdditionalFields.Children.Clear();
             foreach (var af in workitemTemplate.AdditionalFields.OrderBy(k => k.Key))
             {
-                var afavm = new AdditionalFieldAndValueViewModel
-                {
-                    FieldName = af.Key,
-                    Value = af.Value,
-                    IncludeWhenCreating = false
-                };
+                var afavm = new AdditionalFieldAndValueViewModel { FieldName = af.Key, Value = af.Value, IncludeWhenCreating = false };
                 var afUserControl = new AdditionalFieldAndValue(afavm);
                 AdditionalFields.Children.Add(afUserControl);
             }
@@ -48,11 +41,7 @@
             foreach (var child in workitemTemplate.Children ?? new List<WorkitemTemplate>())
             {
                 var childControl = new WorkitemTemplateViewControl(child);
-                var childTab = new TabItem
-                {
-                    Header = child.Name,
-                    Content = childControl
-                };
+                var childTab = new TabItem { Header = child.Name, Content = childControl };
                 WorkItemChildren.Items.Add(childTab);
                 WorkItemChildren.Visibility = Visibility.Visible;
             }
@@ -80,13 +69,7 @@
 
         public WorkitemTemplate AsTemplateDefinition(bool forSavingOnly)
         {
-            var returnValue = new WorkitemTemplate
-            {
-                Name = TemplateName.Text.Trim(),
-                Title = Title.Text.Trim(),
-                Description = Description.Text.Trim(),
-                WorkitemType = WorkitemType.Text.Trim()
-            };
+            var returnValue = new WorkitemTemplate { Name = TemplateName.Text.Trim(), Title = Title.Text.Trim(), Description = Description.Text.Trim(), WorkitemType = WorkitemType.Text.Trim() };
 
             foreach (AdditionalFieldAndValue afav in AdditionalFields.Children)
             {
@@ -98,9 +81,9 @@
 
                 if (forSavingOnly == false && viewModel.IncludeWhenCreating == false)
                 {
-                    continue; 
+                    continue;
                 }
-                
+
 
                 returnValue.AdditionalFields.Add(viewModel.FieldName, viewModel.Value);
             }
@@ -129,15 +112,30 @@
                 witvc.UpdateWorkitemTypeList(workitemTypes);
             }
 
-            
-
+            if (WorkitemType.SelectedIndex < 0 && WorkitemType.Items.Count > 0)
+            {
+                WorkitemType.SelectedIndex = 0;
+            }
+            else
+            {
+                var workitemType = workitemTypes.FirstOrDefault(w => w.Name.Equals(WorkitemType.SelectedItem.ToString().Trim(), StringComparison.OrdinalIgnoreCase));
+                if (workitemType == null)
+                {
+                    Trace.TraceWarning($"The selected workitem type {WorkitemType.SelectedItem} is invalid for this project");
+                    return;
+                }
+                SetEligibleAdditionalFields(workitemType.Fields.ToList());
+            }
         }
 
         public void SetEligibleAdditionalFields(List<WorkItemTypeFieldInstance> workItemFields)
         {
+            var fieldsAlreadyAdded = new List<AdditionalFieldAndValueViewModel>();
+
             foreach (AdditionalFieldAndValue afav in AdditionalFields.Children)
             {
                 var viewModel = afav.ViewModel;
+                fieldsAlreadyAdded.Add(afav.ViewModel);
                 var wiField = workItemFields.FirstOrDefault(f => f.Name.Equals(viewModel.FieldName, StringComparison.OrdinalIgnoreCase));
                 if (wiField == null)
                 {
@@ -145,9 +143,28 @@
                     continue;
                 }
 
+                viewModel.FieldReferenceName = wiField.ReferenceName;
                 viewModel.AllFields = workItemFields;
-
                 viewModel.IsEligible = true;
+            }
+
+            foreach (var wif in workItemFields)
+            {
+                if (fieldsAlreadyAdded.Any(f => string.Equals(f.FieldReferenceName, wif.ReferenceName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                var afavm = new AdditionalFieldAndValueViewModel
+                {
+                    FieldName = wif.Name,
+                    FieldReferenceName = wif.ReferenceName,
+                    AllFields = workItemFields,
+                    IncludeWhenCreating = false,
+                    IsEligible = true
+                };
+                var afUserControl = new AdditionalFieldAndValue(afavm);
+                AdditionalFields.Children.Add(afUserControl);
             }
         }
 

@@ -37,12 +37,9 @@
                 returnValue.SetFail($"The parent workitem type {wit.WorkitemType} does not exist for project {_azDoService.ProjectName}");
                 return returnValue;
             }
-
-            // get the parent template wi type
-            //use the .Fields on that to build the JsonPatchDocument 
-            // create it, get reference to it
-            // then create the child items being sure to reference back to the parent.
+            
             //needs some status reporting/logging in here
+            returnValue.Logs.Add($"Applying fields and values to  parent workitem candidate");
             var parentWorkitemCandidate = ApplyFieldsAndValues(wit, parentWiType, returnValue);
             WorkItem parentWorkitem;
             try
@@ -115,7 +112,7 @@
                 }
                 catch (Exception e)
                 {
-                    returnValue.SetFail(e.Message);
+                    returnValue.SetFail($"Error creating child workitem. {e.Message}");
                     Trace.TraceError(e.ToString());
                     return returnValue;
                 }
@@ -128,11 +125,9 @@
                     Title = cwit.Title
                 });
             } //next child
-
-
+            
             returnValue.IsOk = true;
-
-
+            
             return returnValue;
         }
 
@@ -154,7 +149,16 @@
                     Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
                     Value = item.Value
                 };
-                workitemCandidate.Add(jpo);
+                
+                if (workitemCandidate.Any(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The value {item.Value} will be ignored");
+                    continue;
+                }
+            
+
+
+            workitemCandidate.Add(jpo);
             }
 
 
@@ -162,7 +166,7 @@
             {
                 Operation = Operation.Add,
                 Path = "/fields/System.History",
-                Value = "Created by WorkitemCreator",
+                Value = "Created with WorkitemCreator",
             });
 
             return workitemCandidate;
