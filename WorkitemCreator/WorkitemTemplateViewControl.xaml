@@ -27,7 +27,7 @@
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description"  Grid.Row="3" Grid.Column="1" MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
         <TabControl Name="Details" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" >
             <TabItem Name="AdditionalFieldsTabItem" Header="Additional Fields">
-                <StackPanel>
+                <StackPanel Orientation="Vertical" >
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition MaxWidth="150"/>
@@ -38,9 +38,12 @@
                         <Label Content="Field Value" FontStyle="Italic" Grid.Column="1"/>
                         <Label Content="Include" FontStyle="Italic" Grid.Column="2" ToolTip="When checked, this field value will be included when creating the work item"/>
                     </Grid>
-                    <StackPanel Name="AdditionalFields" Orientation="Vertical">
-                   
-                </StackPanel>
+                    <ScrollViewer Height="Auto" CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+                        <StackPanel Name="AdditionalFields" Orientation="Vertical" Height="300" MinHeight="200">
+
+                        </StackPanel>
+                    </ScrollViewer>
+
                 </StackPanel>
             </TabItem>
             <TabItem Name="WorkitemChildrenTabItem" Header="Child Workitems">

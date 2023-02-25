@@ -17,7 +17,7 @@
           "Description": "Do the programming",
           "AdditionalFields": {
             "Activity": "Development",
-            "RemainingTime": "8"
+            "Remaining Time": "8"
           }
         },
         {
@@ -27,12 +27,12 @@
           "Description": "Do the testing",
           "AdditionalFields": {
             "Activity": "Testing",
-            "RemainingTime": "4"
+            "Remaining Time": "4"
           }
         }
       ],
       "AdditionalFields": {
-        "AcceptanceCriteria": "To 'boldligo'"
+        "Acceptance Criteria": "To 'boldligo'"
       }
     },
     {
@@ -48,7 +48,7 @@
           "Description": "Make the script",
           "Properties": {
             "Activity": "Development",
-            "RemainingTime": "3"
+            "Remaining Time": "3"
           }
         },
         {
@@ -58,7 +58,7 @@
           "Description": "Test the script",
           "Properties": {
             "Activity": "Testing",
-            "RemainingTime": "1"
+            "Remaining Time": "1"
           }
         },
         {

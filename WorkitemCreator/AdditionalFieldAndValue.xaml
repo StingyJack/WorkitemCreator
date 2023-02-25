@@ -17,13 +17,11 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="25"/>
         </Grid.ColumnDefinitions>
-        <ComboBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalContentAlignment="Right" 
-                  SelectedItem="{Binding FieldName, Mode=TwoWay}" SelectedValuePath="Name" DisplayMemberPath="Name"
-                  ItemsSource="{Binding AllFields}"
-                  x:Name="FieldName"/>
+        <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" HorizontalContentAlignment="Right" 
+                  Content="{Binding FieldName, Mode=OneWay}" x:Name="FieldName"/>
         <TextBox x:Name="FieldValue" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"
-                 IsEnabled="{Binding IsEligible, Mode=OneWay}" Text="{Binding Value, Mode=TwoWay}"/>
-        <CheckBox x:Name="FieldIsEnabled" MaxWidth="20" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Margin="0 0 5 0" IsChecked="{Binding IncludeWhenCreating, Mode=TwoWay}" />
+                 IsEnabled="{Binding IsEligible, Mode=OneWay}" Text="{Binding Value, Mode=TwoWay}" TextChanged="FieldValue_OnTextChanged" />
+        <CheckBox x:Name="IncludeFieldWhenCreating" MaxWidth="20" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="2" Margin="0 0 5 0" IsChecked="{Binding IncludeWhenCreating, Mode=TwoWay}" />
         <CheckBox x:Name="FieldIsEligible" Visibility="Collapsed" Grid.Row="0" Grid.Column="2" IsChecked="{Binding IsEligible, Mode=TwoWay}" />
     </Grid>
 </UserControl>

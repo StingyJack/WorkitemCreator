@@ -20,7 +20,7 @@
 
         private bool _isConnected;
 
-        public ConnectResult Connect(string uriString)
+        public async Task<ConnectResult> ConnectAsync(string uriString, string pat = null)
         {
             _ = uriString ?? throw new ArgumentNullException(nameof(uriString));
             var returnValue = new ConnectResult();
@@ -33,14 +33,22 @@
 
             var uri = new Uri(uriString);
 
-            var creds = new VssClientCredentials(new WindowsCredential(false),
-                new VssFederatedCredential(false),
-                CredentialPromptType.PromptIfNeeded);
+            if (string.IsNullOrWhiteSpace(pat))
+            {
+                var creds = new VssClientCredentials(new WindowsCredential(false),
+                    new VssFederatedCredential(false),
+                    CredentialPromptType.PromptIfNeeded);
 
-            _connection = new VssConnection(uri, creds);
+                _connection = new VssConnection(uri, creds);
+            }
+            else
+            {
+                _connection = new VssConnection(uri, new VssBasicCredential(string.Empty, pat));
+            }
+
             try
             {
-                _connection.ConnectAsync().GetAwaiter().GetResult();
+                await _connection.ConnectAsync();
                 _isConnected = true;
             }
             catch (Exception ex)

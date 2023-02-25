@@ -12,6 +12,8 @@
         public bool IncludeStoryNumberInTaskTitle { get; set; }
         [JsonIgnore]
         public string CurrentLogFilePath { get; set; }
+        [JsonIgnore]
+        public string AzDoPat { get; set; }
 
     }
 

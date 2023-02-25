@@ -5,12 +5,6 @@
 
     public class AdditionalFieldAndValueViewModel 
     {
-        public List<WorkItemTypeFieldInstance> AllFields { get; set; } = new List<WorkItemTypeFieldInstance>();
-
-        // these will be nice to have to hide already selected fields from other field dropdown lists.
-        //public List<WorkItemTypeFieldInstance> FieldsUsed { get; set; } = new List<WorkItemTypeFieldInstance>(); 
-
-        //public List<WorkItemTypeFieldInstance> AvailableFields => AllFields.Except(FieldsUsed).ToList();
 
         /// <summary>
         ///     The friendly name of the field.  "Iteration Path" for example

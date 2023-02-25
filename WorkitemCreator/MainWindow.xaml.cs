@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Threading;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -37,7 +38,10 @@
                 var templateViewControl = new WorkitemTemplateViewControl(template);
                 var childTab = new TabItem
                 {
-                    Header = template.Name, Content = templateViewControl, HorizontalContentAlignment = HorizontalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Stretch,
+                    Header = template.Name,
+                    Content = templateViewControl,
+                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                    VerticalContentAlignment = VerticalAlignment.Stretch,
                 };
                 WorkItemTemplates.Items.Add(childTab);
             }
@@ -47,11 +51,14 @@
 
         private void WriteStatus(string message)
         {
-            var line = $"{DateTime.Now:HH:mm:ss} - {message}";
-            Trace.TraceInformation(line);
-            LastMessage.Content = line;
-            LastMessage.ToolTip = line;
-            File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
+            Dispatcher.Invoke(new Action(() =>
+            {
+                var line = $"{DateTime.Now:HH:mm:ss} - {message}";
+                Trace.TraceInformation(line);
+                LastMessage.Content = line;
+                LastMessage.ToolTip = line;
+                File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
+            }));
         }
 
         private void ReportError(string errorMessage, string title)
@@ -66,8 +73,10 @@
         {
             var serviceUrl = ServiceUrl.Text.Trim();
             WriteStatus($"Connecting to {serviceUrl}...");
+            
+            ConnectionState.Content = "Connecting";
 
-            var connResult = _azDoService.Connect(serviceUrl);
+            var connResult = await _azDoService.ConnectAsync(serviceUrl, _config.AzDoPat);
             if (connResult.IsConnected == false)
             {
                 WriteStatus($"Unable to connect. {connResult.ConnectionError}");
@@ -76,7 +85,7 @@
 
             ConnectionState.Content = "Connected";
             WriteStatus("Connected to AzDo server");
-            
+
             WriteStatus("Getting available projects");
             var projectResult = await _azDoService.GetProjectsAsync();
             WriteStatus($"Got {projectResult.Data.Count} projects");
@@ -98,7 +107,7 @@
                 TeamProjectList.SelectedIndex = 0;
             }
         }
-        
+
         private async void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _azDoService.ProjectName = TeamProjectList.SelectedItem?.ToString();

@@ -21,6 +21,12 @@
             var configContents = File.ReadAllText("config.json");
             var config = JsonConvert.DeserializeObject<Config>(configContents);
             config.CurrentLogFilePath = $".\\{nameof(WorkitemCreator)}.{DateTimeOffset.Now:yyyy.MM.dd.HH.mm.ss}.log";
+            if (e.Args.Length > 0)
+            {
+                var pat = e.Args[0].Trim();
+                config.AzDoPat = pat;
+            }
+
             var main = new MainWindow(config);
 
             main.Show();

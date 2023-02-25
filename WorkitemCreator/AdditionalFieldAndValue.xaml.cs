@@ -1,8 +1,7 @@
 ﻿namespace WorkitemCreator
 {
     using System;
-    using System.Collections.Generic;
-    using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+    using System.Windows.Controls;
 
     /// <summary>
     /// Interaction logic for AdditionalFieldAndValue.xaml
@@ -17,20 +16,11 @@
         {
             ViewModel = fieldAndValueViewModel ?? throw new ArgumentNullException(nameof(fieldAndValueViewModel));
             DataContext = fieldAndValueViewModel;
-
-            if (ViewModel.AllFields.Count == 0)
-            {
-                ViewModel.AllFields.Add(new WorkItemTypeFieldInstance(){Name = ViewModel.FieldName, ReferenceName = ViewModel.FieldReferenceName});
-                FieldName.SelectedIndex = 0;
-            }
-            //FieldName.Content = fieldAndValueViewModel.FieldName;
-            //FieldValue.Text = fieldAndValueViewModel.Value;
-            //FieldIsEnabled.IsChecked = fieldAndValueViewModel.IncludeWhenCreating;
-            //FieldIsEligible.IsChecked = fieldAndValueViewModel.IsEligible; 
         }
-        
-        public void SetAvailableFields(List<WorkItemTypeFieldInstance> availableFields) => ViewModel.AllFields = availableFields;
 
-    
+        private void FieldValue_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.IncludeWhenCreating = string.IsNullOrWhiteSpace(FieldValue.Text) == false;
+        }
     }
 }

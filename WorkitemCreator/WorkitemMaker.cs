@@ -37,9 +37,9 @@
                 returnValue.SetFail($"The parent workitem type {wit.WorkitemType} does not exist for project {_azDoService.ProjectName}");
                 return returnValue;
             }
-            
+
             //needs some status reporting/logging in here
-            returnValue.Logs.Add($"Applying fields and values to  parent workitem candidate");
+            returnValue.Logs.Add("Applying fields and values to  parent workitem candidate");
             var parentWorkitemCandidate = ApplyFieldsAndValues(wit, parentWiType, returnValue);
             WorkItem parentWorkitem;
             try
@@ -104,7 +104,7 @@
                         return returnValue;
                     }
 
-                    childWorkitem = childWorkitemCreationResult.Data; 
+                    childWorkitem = childWorkitemCreationResult.Data;
                     if (childWorkitem.Id.HasValue == false)
                     {
                         throw new InvalidOperationException("Child workitem was not created.");
@@ -125,9 +125,9 @@
                     Title = cwit.Title
                 });
             } //next child
-            
+
             returnValue.IsOk = true;
-            
+
             return returnValue;
         }
 
@@ -149,16 +149,15 @@
                     Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
                     Value = item.Value
                 };
-                
+
                 if (workitemCandidate.Any(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase)))
                 {
                     returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The value {item.Value} will be ignored");
                     continue;
                 }
-            
 
 
-            workitemCandidate.Add(jpo);
+                workitemCandidate.Add(jpo);
             }
 
 
