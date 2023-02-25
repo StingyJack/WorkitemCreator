@@ -121,6 +121,25 @@
             return returnValue;
         }
 
+        public async Task<OpResult<List<WorkItemTypeFieldWithReferences>>> GetWorkItemTypeFieldsAsync(string workItemTypeName)
+        {
+            var returnValue = new OpResult<List<WorkItemTypeFieldWithReferences>>();
+            if (_isConnected == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors = $"Not connected, so cant get workitem types  ";
+                return returnValue;
+            }
+
+
+            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var typeFields = (await client.GetWorkItemTypeFieldsWithReferencesAsync(ProjectName,workItemTypeName, WorkItemTypeFieldsExpandLevel.All)).ToList();
+            returnValue.IsOk = true;
+            returnValue.Data = typeFields;
+            return returnValue;
+        }
+
+
         public async Task<OpResult<WorkItem>> CreateWorkitemAsync(JsonPatchDocument candidateWorkitem, string workItemType)
         {
             var returnValue = new OpResult<WorkItem>();
