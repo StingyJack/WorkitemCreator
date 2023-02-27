@@ -64,9 +64,9 @@
 
         public Task<OpResult<List<TeamProjectCollectionReference>>> GetProjectCollectionsAsync()
         {
-            throw new NotSupportedException($"Getting the project collections requires a different URL than all the other operations, and " +
-                                            $"possibly would require a separate auth. Just use the project collection url when connecting and" +
-                                            $"avoid doing this project collection listing.");
+            throw new NotSupportedException("Getting the project collections requires a different URL than all the other operations, and " +
+                                            "possibly would require a separate auth. Just use the project collection url when connecting and" +
+                                            "avoid doing this project collection listing.");
 
             //var returnValue = new OpResult<List<TeamProjectCollectionReference>>();
             //if (_isConnected == false)
@@ -90,7 +90,7 @@
             if (_isConnected == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors = $"Not connected, so cant get projects";
+                returnValue.Errors = "Not connected, so cant get projects";
                 return returnValue;
             }
 
@@ -102,14 +102,14 @@
             return returnValue;
         }
 
-        
+
         public async Task<OpResult<List<WorkItemType>>> GetWorkItemTypesAsync()
         {
             var returnValue = new OpResult<List<WorkItemType>>();
             if (_isConnected == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors = $"Not connected, so cant get workitem types  ";
+                returnValue.Errors = "Not connected, so cant get workitem types  ";
                 return returnValue;
             }
 
@@ -127,18 +127,46 @@
             if (_isConnected == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors = $"Not connected, so cant get workitem types  ";
+                returnValue.Errors = "Not connected, so cant get workitem types  ";
                 return returnValue;
             }
 
-
             var client = _connection.GetClient<WorkItemTrackingHttpClient>();
-            var typeFields = (await client.GetWorkItemTypeFieldsWithReferencesAsync(ProjectName,workItemTypeName, WorkItemTypeFieldsExpandLevel.All)).ToList();
+            var typeFields = (await client.GetWorkItemTypeFieldsWithReferencesAsync(ProjectName, workItemTypeName, WorkItemTypeFieldsExpandLevel.All)).ToList();
             returnValue.IsOk = true;
             returnValue.Data = typeFields;
             return returnValue;
         }
 
+        public async Task<OpResult<List<WorkItemClassificationNode>>> GetIterationsAsync()
+        {
+            return await GetClassificationNodes(TreeNodeStructureType.Iteration);
+        }
+
+        public async Task<OpResult<List<WorkItemClassificationNode>>> GetAreaPathsAsync()
+        {
+            return await GetClassificationNodes(TreeNodeStructureType.Area);
+        }
+
+        private async Task<OpResult<List<WorkItemClassificationNode>>> GetClassificationNodes(TreeNodeStructureType nodeType)
+        {
+            var returnValue = new OpResult<List<WorkItemClassificationNode>>();
+            if (_isConnected == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors = $"Not connected, so cant get {nodeType}";
+                return returnValue;
+            }
+
+            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var rootClassificationNodes = (await client.GetRootNodesAsync(ProjectName)).ToList();
+            var root = rootClassificationNodes.First(r => r.StructureType == nodeType);
+
+            var nodes = await client.GetClassificationNodesAsync(ProjectName, new[] { root.Id }, depth: 20);
+            returnValue.IsOk = true;
+            returnValue.Data = nodes;
+            return returnValue;
+        }
 
         public async Task<OpResult<WorkItem>> CreateWorkitemAsync(JsonPatchDocument candidateWorkitem, string workItemType)
         {
@@ -146,7 +174,7 @@
             if (_isConnected == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors = $"Not connected, so cant create a workitem";
+                returnValue.Errors = "Not connected, so cant create a workitem";
                 return returnValue;
             }
 
@@ -157,6 +185,6 @@
             return returnValue;
         }
 
-        
+
     }
 }

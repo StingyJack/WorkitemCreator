@@ -13,19 +13,32 @@
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30"/>
             <RowDefinition MaxHeight="100"/>
             <RowDefinition Height="*"/>
             <RowDefinition MaxHeight="30"/>
         </Grid.RowDefinitions>
+        
         <Label Content="Name:" HorizontalAlignment="Right"  VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="TemplateName" Text="" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" MinWidth="200" Margin="3"/>
+        
         <Label Content="Title:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0"/>
         <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" x:Name="Title" Text="" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1" MinWidth="200" Margin="3"/>
+        
         <Label Content="Type:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0"/>
         <ComboBox HorizontalAlignment="Stretch" x:Name="WorkitemType" Text="" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" MinWidth="100" Margin="3" SelectionChanged="WorkitemType_SelectionChanged"/>
-        <Label Content="Description:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description"  Grid.Row="3" Grid.Column="1" MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
-        <TabControl Name="Details" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" >
+
+        <Label Content="Area Path:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0"/>
+        <ComboBox HorizontalAlignment="Stretch" x:Name="AreaPath" Text="" SelectedValuePath="Key" DisplayMemberPath="Value" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1" MinWidth="100" Margin="3"/>
+
+        <Label Content="Iteration:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0"/>
+        <ComboBox HorizontalAlignment="Stretch" x:Name="IterationPath" SelectedValuePath="Key" DisplayMemberPath="Value" Text="" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1" MinWidth="100" Margin="3" />
+
+        <Label Content="Description:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0"/>
+        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description"  Grid.Row="5" Grid.Column="1" MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
+        
+        <TabControl Name="Details" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" >
             <TabItem Name="AdditionalFieldsTabItem" Header="Additional Fields">
                 <StackPanel Orientation="Vertical" >
                     <Grid>

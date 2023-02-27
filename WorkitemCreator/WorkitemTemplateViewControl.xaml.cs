@@ -117,17 +117,24 @@
             return returnValue;
         }
 
-        public void UpdateWorkitemTypeList(List<WorkItemType> workitemTypes)
+        public void UpdateWithProjectConfiguration(List<WorkItemType> workitemTypes, List<WorkItemClassificationNode> iterationNodes, List<WorkItemClassificationNode> areaPathNodes)
         {
             _workItemTypes = workitemTypes;
 
             var workitemTypeNames = workitemTypes.Select(s => s.Name);
 
             WorkitemType.ItemsSource = workitemTypeNames;
+            var iterations = new Dictionary<int, string>();
+            IterationPath.ItemsSource = FlattenClassificationNodes(iterationNodes, ref iterations);
+
+            var areaPaths = new Dictionary<int, string>();
+            AreaPath.ItemsSource = FlattenClassificationNodes(areaPathNodes, ref areaPaths);
+
+
             foreach (TabItem ti in WorkItemChildren.Items)
             {
                 var witvc = (WorkitemTemplateViewControl)ti.Content;
-                witvc.UpdateWorkitemTypeList(workitemTypes);
+                witvc.UpdateWithProjectConfiguration(workitemTypes, iterationNodes, areaPathNodes);
             }
 
             if (WorkitemType.SelectedIndex < 0 && WorkitemType.Items.Count > 0)
@@ -145,6 +152,22 @@
 
                 SetEligibleAdditionalFields(workitemType.Fields.ToList());
             }
+        }
+
+        private Dictionary<int, string> FlattenClassificationNodes(List<WorkItemClassificationNode> treeNodes, ref Dictionary<int, string> collectedNodes)
+        {
+            foreach (var tn in treeNodes)
+            {
+                collectedNodes.Add(tn.Id, tn.Path);
+                if (tn.HasChildren.HasValue && tn.HasChildren.Value)
+                {
+                    //collectedNodes.AddRange(
+                    FlattenClassificationNodes(tn.Children.ToList(), ref collectedNodes);
+                    //);
+                }
+            }
+
+            return collectedNodes;
         }
 
         public void SetEligibleAdditionalFields(List<WorkItemTypeFieldInstance> workItemFields)
@@ -169,21 +192,10 @@
 
             foreach (var wif in workItemFields.OrderBy(f => f.Name))
             {
-                //we dont want to show things like "Area Path 1", "IterationPath 2", etc
-                var lastChar = wif.Name.Substring(wif.Name.Length - 1, 1);
-                if (int.TryParse(lastChar, out _))
+                if (IsFieldPreventedFromBeingShownInAdditionalFields(wif))
                 {
                     continue;
                 }
-
-                //also dont want to show fields in this area that already have specific inputs
-                if (wif.ReferenceName.Equals("System.Title", StringComparison.OrdinalIgnoreCase)
-                    || wif.ReferenceName.Equals("System.Description", StringComparison.OrdinalIgnoreCase)
-                    || wif.ReferenceName.Equals("System.History", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
 
                 if (fieldsAlreadyAdded.Any(f => string.Equals(f.FieldReferenceName, wif.ReferenceName, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -201,6 +213,63 @@
                 AdditionalFields.Children.Add(afUserControl);
                 fieldsAlreadyAdded.Add(afavm);
             }
+        }
+
+        private static bool IsFieldPreventedFromBeingShownInAdditionalFields(WorkItemTypeFieldInstance wif)
+        {
+            //TODO: this can be moved to configuration.
+
+            //we dont want to show things like "Area Path 1", "IterationPath 2", etc
+            var lastChar = wif.Name.Substring(wif.Name.Length - 1, 1);
+            if (int.TryParse(lastChar, out _))
+            {
+                return true;
+            }
+
+            //also dont want to show fields in this area that already have specific inputs from this program
+            // or that are not appropriate when creating a workitem
+            if (wif.ReferenceName.Equals("System.Title", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.Description", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.History", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.IterationPath", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.AreaPath", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.TeamProject", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.Resolution", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.IntegrationBuild", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.Parent", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.State", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.Reason", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.ResolvedReason", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.AuthorizedAs", StringComparison.OrdinalIgnoreCase)
+                || wif.ReferenceName.Equals("System.Rev", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            
+            //also dont need to show change tracking fields or calculated fields like "Count"s or system assigned fields like IDs
+            var splits = wif.Name.Split(' ');
+            var lastWord = splits[splits.Length - 1];
+            if ("Date".Equals(lastWord, StringComparison.OrdinalIgnoreCase)
+                || "By".Equals(lastWord, StringComparison.OrdinalIgnoreCase)
+                || "Count".Equals(lastWord, StringComparison.OrdinalIgnoreCase)
+                || "ID".Equals(lastWord, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            //"Board Column", "Board Column Done", "Board Lane"
+            if (splits.Any(s => "Board".Equals(s, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            //"Node Name"
+            if (splits.Any(s => "Node".Equals(s, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         #endregion //#region "Data and View helpers"

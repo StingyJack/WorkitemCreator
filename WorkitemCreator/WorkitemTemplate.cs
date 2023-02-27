@@ -9,24 +9,11 @@
         public string Title { get; set; }
         public string Description { get; set; }
         public string WorkitemType { get; set; }
+        public string AreaPath { get; set; }
+        public string IterationPath { get; set; }
+
         public List<WorkitemTemplate> Children { get; set; } = new List<WorkitemTemplate>();
         public Dictionary<string, string> AdditionalFields { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        public List<string> GetAllWiTypesInTemplate()
-        {
-            var returnValue = new List<string> { WorkitemType };
-
-            foreach (var c in Children)
-            {
-                if (returnValue.Contains(c.WorkitemType) == false)
-                {
-                    returnValue.Add(c.WorkitemType);
-                }
-            }
-
-
-            return returnValue;
-        }
 
         public Dictionary<string, string> AsDictionary()
         {

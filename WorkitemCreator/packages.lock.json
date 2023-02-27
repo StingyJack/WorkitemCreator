@@ -107,6 +107,12 @@
         "resolved": "13.0.2",
         "contentHash": "R2pZ3B0UjeyHShm9vG+Tu0EBb2lC8b0dFzV9gVn50ofHXh9Smjk6kTn7A/FdAsC8B5cKib1OnGYOXxRBz5XQDg=="
       },
+      "System.Data.SqlClient": {
+        "type": "Direct",
+        "requested": "[4.8.5, )",
+        "resolved": "4.8.5",
+        "contentHash": "fRqxut4lrndPHrXD+ht1XRmCL3obuKldm4XjCRYS9p5f7FSR7shBxAwTkDrpFMsHC9BhNgjjmUtiIjvehn5zkg=="
+      },
       "Ben.Demystifier": {
         "type": "Transitive",
         "resolved": "0.1.2",
@@ -243,11 +249,6 @@
         "type": "Transitive",
         "resolved": "7.0.0",
         "contentHash": "bhAs+5X5acgg3zQ6N4HqxqfwwmqWJzgt54BC8iwygcqa2jktxDFzxwN83GNvqgoTcTs2tenDS/jmhC+AQsmcyg=="
-      },
-      "System.Data.SqlClient": {
-        "type": "Transitive",
-        "resolved": "4.8.3",
-        "contentHash": "yERfVLXAY0QbylAgaGLByYN0hFxX28aeEQ0hUgJO+Ntn1AfmWl5HHUoYJA0Yl9HhIUUJHVaS/Sw/RLZr5aaC+A=="
       },
       "System.Diagnostics.EventLog": {
         "type": "Transitive",
@@ -568,6 +569,12 @@
       }
     },
     ".NETFramework,Version=v4.8/win7-x86": {
+      "System.Data.SqlClient": {
+        "type": "Direct",
+        "requested": "[4.8.5, )",
+        "resolved": "4.8.5",
+        "contentHash": "fRqxut4lrndPHrXD+ht1XRmCL3obuKldm4XjCRYS9p5f7FSR7shBxAwTkDrpFMsHC9BhNgjjmUtiIjvehn5zkg=="
+      },
       "Microsoft.Win32.Registry": {
         "type": "Transitive",
         "resolved": "5.0.0",
@@ -576,11 +583,6 @@
           "System.Security.AccessControl": "5.0.0",
           "System.Security.Principal.Windows": "5.0.0"
         }
-      },
-      "System.Data.SqlClient": {
-        "type": "Transitive",
-        "resolved": "4.8.3",
-        "contentHash": "yERfVLXAY0QbylAgaGLByYN0hFxX28aeEQ0hUgJO+Ntn1AfmWl5HHUoYJA0Yl9HhIUUJHVaS/Sw/RLZr5aaC+A=="
       },
       "System.IO.FileSystem.AccessControl": {
         "type": "Transitive",

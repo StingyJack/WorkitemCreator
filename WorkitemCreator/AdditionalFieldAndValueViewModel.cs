@@ -1,8 +1,5 @@
 ﻿namespace WorkitemCreator
 {
-    using System.Collections.Generic;
-    using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-
     public class AdditionalFieldAndValueViewModel 
     {
 
