@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using Microsoft.TeamFoundation.Core.WebApi;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -72,7 +73,7 @@
         {
             var serviceUrl = ServiceUrl.Text.Trim();
             WriteStatus($"Connecting to {serviceUrl}...");
-            
+
             ConnectionState.Content = "Connecting";
 
             var connResult = await _azDoService.ConnectAsync(serviceUrl, _config.AzDoPat);
@@ -90,11 +91,12 @@
             WriteStatus($"Got {projectResult.Data.Count} projects");
             foreach (var p in projectResult.Data.OrderBy(p => p.Name))
             {
-                TeamProjectList.Items.Add(p.Name);
+               
+                TeamProjectList.Items.Add(p);
                 if (string.IsNullOrWhiteSpace(_config.LastSelectedTeamProject) == false
                     && string.Equals(p.Name, _config.LastSelectedTeamProject, StringComparison.OrdinalIgnoreCase))
                 {
-                    TeamProjectList.SelectedItem = p.Name;
+                    TeamProjectList.SelectedItem = p;
                 }
             }
 
@@ -109,7 +111,10 @@
 
         private async void TeamProjectList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _azDoService.ProjectName = TeamProjectList.SelectedItem?.ToString();
+            var selectedProject = (TeamProjectReference)TeamProjectList.SelectedItem;
+            _azDoService.ProjectName = selectedProject.Name;
+            _azDoService.ProjectId = selectedProject.Id;
+
             WriteStatus($"Getting workitem types for project {_azDoService.ProjectName}...");
             var wiTypeResult = await _azDoService.GetWorkItemTypesAsync();
             if (wiTypeResult.IsOk == false)
@@ -118,7 +123,20 @@
                 return;
             }
             WriteStatus($"Got {wiTypeResult.Data.Count} workitem types for project {_azDoService.ProjectName}");
+
+            WriteStatus($"Getting teams for project {_azDoService.ProjectName}...");
+            var teamsResult = await _azDoService.GetTeamsAsync();
+            if (teamsResult.IsOk == false)
+            {
+                ReportError(teamsResult.Errors, $"Failed to get Teams for project {_azDoService.ProjectName}.");
+                return;
+            }
+
+            TeamsList.ItemsSource = teamsResult.Data;
+            TeamsList.IsEnabled = true;
+            WriteStatus($"Got {teamsResult.Data.Count} teams for project {_azDoService.ProjectName}");
             
+
             WriteStatus($"Getting iterations for project {_azDoService.ProjectName}...");
             var iterationsResult = await _azDoService.GetIterationsAsync();
             if (iterationsResult.IsOk == false)
@@ -136,7 +154,7 @@
                 return;
             }
             WriteStatus($"Got {areaPathsResult.Data.Count} area paths for project {_azDoService.ProjectName}");
-            
+
 
             foreach (TabItem ti in WorkItemTemplates.Items)
             {
@@ -144,12 +162,23 @@
                 witvc.UpdateWithProjectConfiguration(wiTypeResult.Data, iterationsResult.Data, areaPathsResult.Data);
             }
 
-            if (TeamProjectList.SelectedIndex >= 0)
+            
+        }
+
+
+        private void TeamsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _azDoService.TeamName = ((WebApiTeam)TeamsList.SelectedValue).Name;
+
+            var teamTemplates = await _azDoService.GetTeamWorkitemTemplatesAsync();
+
+            if (TeamsList.SelectedIndex >= 0)
             {
                 WriteStatus("Ready to create!");
                 CreateWorkitems.IsEnabled = true;
                 WorkItemTemplates.IsEnabled = true;
             }
+
         }
 
         private async void CreateWorkitems_Click(object sender, RoutedEventArgs e)
@@ -167,5 +196,7 @@
 
             MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
         }
+
+
     }
 }

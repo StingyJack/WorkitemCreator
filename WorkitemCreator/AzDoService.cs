@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.TeamFoundation.Core.WebApi;
+    using Microsoft.TeamFoundation.Core.WebApi.Types;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Microsoft.VisualStudio.Services.Client;
@@ -16,6 +17,9 @@
     {
         public string ProjectCollectionName { get; set; }
         public string ProjectName { get; set; }
+        public Guid ProjectId { get; set; }
+        public string TeamName { get; set; }
+        
         private VssConnection _connection;
 
         private bool _isConnected;
@@ -95,14 +99,13 @@
             }
 
 
-            var projectClient = _connection.GetClient<ProjectHttpClient>();
-            var projects = (await projectClient.GetProjects()).ToList();
+            var client = _connection.GetClient<ProjectHttpClient>();
+            var projects = (await client.GetProjects()).ToList();
             returnValue.IsOk = true;
             returnValue.Data = projects;
             return returnValue;
         }
-
-
+        
         public async Task<OpResult<List<WorkItemType>>> GetWorkItemTypesAsync()
         {
             var returnValue = new OpResult<List<WorkItemType>>();
@@ -114,30 +117,50 @@
             }
 
 
-            var witc = _connection.GetClient<WorkItemTrackingHttpClient>();
-            var wiTypes = (await witc.GetWorkItemTypesAsync(ProjectName)).ToList();
+            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var wiTypes = (await client.GetWorkItemTypesAsync(ProjectName)).ToList();
             returnValue.IsOk = true;
             returnValue.Data = wiTypes;
             return returnValue;
         }
 
-        public async Task<OpResult<List<WorkItemTypeFieldWithReferences>>> GetWorkItemTypeFieldsAsync(string workItemTypeName)
+        public async Task<OpResult<List<WebApiTeam>>> GetTeamsAsync()
         {
-            var returnValue = new OpResult<List<WorkItemTypeFieldWithReferences>>();
+            var returnValue = new OpResult<List<WebApiTeam>>();
             if (_isConnected == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors = "Not connected, so cant get workitem types  ";
+                returnValue.Errors = "Not connected, so cant get teams";
                 return returnValue;
             }
 
-            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
-            var typeFields = (await client.GetWorkItemTypeFieldsWithReferencesAsync(ProjectName, workItemTypeName, WorkItemTypeFieldsExpandLevel.All)).ToList();
+
+            var client = _connection.GetClient<TeamHttpClient>();
+            var data = (await client.GetTeamsAsync(ProjectId.ToString())).ToList();
             returnValue.IsOk = true;
-            returnValue.Data = typeFields;
+            returnValue.Data = data;
             return returnValue;
         }
 
+        public async Task<OpResult<List<WorkItemTemplateReference>>> GetTeamWorkitemTemplatesAsync()
+        {
+            var returnValue = new OpResult<List<WorkItemTemplateReference>>();
+            if (_isConnected == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors = "Not connected, so cant get teams";
+                return returnValue;
+            }
+
+
+            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var data = (await client.GetTemplatesAsync(new TeamContext(ProjectName, TeamName))).ToList();
+            returnValue.IsOk = true;
+            returnValue.Data = data;
+            return returnValue;
+        }
+
+        
         public async Task<OpResult<List<WorkItemClassificationNode>>> GetIterationsAsync()
         {
             return await GetClassificationNodes(TreeNodeStructureType.Iteration);
