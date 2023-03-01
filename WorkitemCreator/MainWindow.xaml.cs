@@ -33,18 +33,28 @@
             WriteStatus("Loading templates from config");
             WorkItemTemplates.Items.Clear();
             ServiceUrl.Text = _config.ServiceUrl;
-            foreach (var template in _config.Templates)
+            //foreach (var template in _config.Templates)
+            //{
+            //    var templateViewControl = new WorkitemTemplateViewControl(template);
+            //    var childTab = new TabItem
+            //    {
+            //        Header = template.Name,
+            //        Content = templateViewControl,
+            //        HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            //        VerticalContentAlignment = VerticalAlignment.Stretch,
+            //    };
+            //    WorkItemTemplates.Items.Add(childTab);
+            //}
+            var templateSelectorControl = new TemplateSelector();
+            var tab = new TabItem
             {
-                var templateViewControl = new WorkitemTemplateViewControl(template);
-                var childTab = new TabItem
-                {
-                    Header = template.Name,
-                    Content = templateViewControl,
-                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                    VerticalContentAlignment = VerticalAlignment.Stretch,
-                };
-                WorkItemTemplates.Items.Add(childTab);
-            }
+                Header = "Example",
+                Content = templateSelectorControl,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                VerticalContentAlignment = VerticalAlignment.Stretch
+            };
+
+            WorkItemTemplates.Items.Add(tab);
 
             WriteStatus("Templates loaded from config");
         }
@@ -158,19 +168,41 @@
 
             foreach (TabItem ti in WorkItemTemplates.Items)
             {
-                var witvc = (WorkitemTemplateViewControl)ti.Content;
+                var witvc = ti.Content as WorkitemTemplateViewControl;
+                if (witvc == null)
+                {
+                    continue;
+                }
                 witvc.UpdateWithProjectConfiguration(wiTypeResult.Data, iterationsResult.Data, areaPathsResult.Data);
             }
 
-            
+            if (TeamsList.SelectedIndex < 0 && TeamsList.Items.Count > 0)
+            {
+                TeamsList.SelectedIndex = 0;
+            }
         }
 
 
-        private void TeamsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void TeamsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _azDoService.TeamName = ((WebApiTeam)TeamsList.SelectedValue).Name;
 
-            var teamTemplates = await _azDoService.GetTeamWorkitemTemplatesAsync();
+            var teamTemplatesResult = await _azDoService.GetTeamWorkitemTemplatesAsync();
+            if (teamTemplatesResult.IsOk == false)
+            {
+                ReportError(teamTemplatesResult.Errors, "Failed to get team templates");
+                return;
+            }
+
+            foreach (TabItem ti in WorkItemTemplates.Items)
+            {
+                var templateSelector = ti.Content as TemplateSelector;
+                if (templateSelector == null)
+                {
+                    continue;
+                }
+                templateSelector.UpdateFromProjectData(teamTemplatesResult.Data);
+            }
 
             if (TeamsList.SelectedIndex >= 0)
             {
