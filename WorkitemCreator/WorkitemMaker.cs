@@ -38,8 +38,11 @@
             }
 
 
-            await Task.Delay(1);
-            throw new NotImplementedException("");
+
+
+
+            return returnValue;
+
         }
 
         public async Task<WorkitemCreationResult> CreateWorkitemsRawAsync(WorkitemTemplate wit)

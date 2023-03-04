@@ -245,7 +245,7 @@
             {
                 return true;
             }
-            
+
             //also dont need to show change tracking fields or calculated fields like "Count"s or system assigned fields like IDs
             var splits = wif.Name.Split(' ');
             var lastWord = splits[splits.Length - 1];

@@ -10,7 +10,10 @@
     {
         public AdditionalFieldAndValueViewModel ViewModel { get; }
 
-        private AdditionalFieldAndValue() => InitializeComponent();
+        private AdditionalFieldAndValue()
+        {
+            InitializeComponent();
+        }
 
         public AdditionalFieldAndValue(AdditionalFieldAndValueViewModel fieldAndValueViewModel) : this()
         {

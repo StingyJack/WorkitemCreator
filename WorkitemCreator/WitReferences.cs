@@ -9,8 +9,6 @@
     {
         public string TemplateSetName { get; set; }
         public Guid TemplateId { get; set; }
-        public string TemplateName { get; set; }
-        public string WorkItemType { get; set; }
         public List<ConfiguredWitReference> Children { get; set; } = new List<ConfiguredWitReference>();
     }
 
@@ -22,7 +20,6 @@
 
         public LocalWiTemplateReference()
         {
-            
         }
 
         public LocalWiTemplateReference(WorkItemTemplateReference witr)

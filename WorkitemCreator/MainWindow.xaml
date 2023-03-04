@@ -62,7 +62,7 @@
 
         </Style>
         <Style TargetType="{x:Type TabControl}">
-            <Setter Property="Margin" Value="0 10 0 10"></Setter>
+            <Setter Property="Margin" Value="0 10 0 10" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="VerticalContentAlignment" Value="Stretch" />

@@ -12,7 +12,6 @@
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-         
             if (File.Exists("config.json") == false)
             {
                 throw new FileNotFoundException("Unable to locate configuration", "config.json");

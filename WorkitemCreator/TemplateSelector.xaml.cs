@@ -5,14 +5,13 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
-    using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
     /// <summary>
     /// Interaction logic for TemplateSelector.xaml
     /// </summary>
     public partial class TemplateSelector
     {
-        private List<WorkItemTemplateReference> _workItemTemplates;
+        private List<LocalWiTemplateReference> _allWorkItemTemplates;
 
         public TemplateSelector()
         {
@@ -24,12 +23,12 @@
             AddChildWorkitemTemplateUiControls();
         }
 
-        public void UpdateFromSourceData(List<WorkItemTemplateReference> workItemTemplates, LocalWiTemplateReference localWiTemplateReference)
+        public void UpdateFromSourceData(List<LocalWiTemplateReference> allWorkitemTemplates, LocalWiTemplateReference localWiTemplateReference)
         {
-            _workItemTemplates = workItemTemplates ?? throw new ArgumentNullException(nameof(workItemTemplates));
+            _allWorkItemTemplates = allWorkitemTemplates ?? throw new ArgumentNullException(nameof(allWorkitemTemplates));
 
-            ParentWorkItemTemplate.ItemsSource = _workItemTemplates;
-            if (workItemTemplates.Any(w => w.Id.Equals(localWiTemplateReference.Id)))
+            ParentWorkItemTemplate.ItemsSource = _allWorkItemTemplates;
+            if (allWorkitemTemplates.Any(w => w.Id.Equals(localWiTemplateReference.Id)))
             {
                 ParentWorkItemTemplate.SelectedValue = localWiTemplateReference.Id;
             }
@@ -42,25 +41,32 @@
 
         private void AddChildWorkitemTemplateUiControls(LocalWiTemplateReference existingConfiguredChildTemplate = null)
         {
-            var insertionIndex = ChildTemplates.Children.Count - 1;
-            var stackPanel = new StackPanel
-            {
-                Orientation = Orientation.Horizontal
-            };
-            stackPanel.Children.Add(new Label
+            var insertionIndex = ChildTemplates.Children.Count;
+            ChildTemplates.RowDefinitions.Add(new RowDefinition());
+
+
+            var hiddenIndex = new Label
             {
                 Content = insertionIndex,
                 Visibility = Visibility.Collapsed,
-            });
-            stackPanel.Children.Add(new Label
+            };
+            ChildTemplates.Children.Add(hiddenIndex);
+            Grid.SetRow(hiddenIndex, insertionIndex);
+            Grid.SetColumn(hiddenIndex, 0);
+
+            var caption = new Label
             {
                 Content = "Select Child:",
                 HorizontalAlignment = HorizontalAlignment.Right
-            });
+            };
+            ChildTemplates.Children.Add(caption);
+            Grid.SetRow(caption, insertionIndex);
+            Grid.SetColumn(caption, 0);
+
             var comboBox = new ComboBox
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                ItemsSource = _workItemTemplates,
+                ItemsSource = _allWorkItemTemplates,
                 DisplayMemberPath = nameof(LocalWiTemplateReference.Title),
                 SelectedValuePath = nameof(LocalWiTemplateReference.Id)
             };
@@ -70,7 +76,10 @@
                 comboBox.SelectedValue = existingConfiguredChildTemplate.Id;
             }
 
-            stackPanel.Children.Add(comboBox);
+            ChildTemplates.Children.Add(comboBox);
+            Grid.SetRow(comboBox, insertionIndex);
+            Grid.SetColumn(comboBox, 1);
+
             var btn = new Button
             {
                 Content = "Remove",
@@ -78,9 +87,9 @@
                 Margin = new Thickness(4)
             };
             btn.Click += ChildWorkitemTemplate_Remove;
-            stackPanel.Children.Add(btn);
-
-            ChildTemplates.Children.Insert(insertionIndex, stackPanel);
+            ChildTemplates.Children.Add(btn);
+            Grid.SetRow(btn, insertionIndex);
+            Grid.SetColumn(btn, 2);
         }
 
         private void ChildWorkitemTemplate_Remove(object sender, RoutedEventArgs e)
@@ -92,6 +101,40 @@
             ChildTemplates.Children.RemoveAt(removeIndex);
         }
 
-       
+
+        public LocalWiTemplateReference AsLocalWiTemplateReference()
+        {
+            
+            var returnValue = ParentWorkItemTemplate.SelectedItem as LocalWiTemplateReference;
+            if (returnValue == null)
+            {
+                return null;
+            }
+
+            foreach (var childItem in ChildTemplates.Children)
+            {
+                var comboBox = childItem as ComboBox;
+                if (comboBox == null)
+                {
+                    continue;
+                }
+
+                if (comboBox.SelectedIndex < 0)
+                {
+                    continue;
+                }
+
+                var cwitr = comboBox.SelectedItem as LocalWiTemplateReference;
+                if (cwitr == null)
+                {
+                    continue;
+                }
+
+                returnValue.ChildTemplates.Add(cwitr);
+
+            }
+
+            return returnValue;
+        }
     }
 }

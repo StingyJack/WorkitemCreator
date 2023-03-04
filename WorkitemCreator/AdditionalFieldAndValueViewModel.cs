@@ -1,8 +1,7 @@
 ﻿namespace WorkitemCreator
 {
-    public class AdditionalFieldAndValueViewModel 
+    public class AdditionalFieldAndValueViewModel
     {
-
         /// <summary>
         ///     The friendly name of the field.  "Iteration Path" for example
         /// </summary>
@@ -27,6 +26,5 @@
         ///     True if the field exists for the workitem type
         /// </summary>
         public bool IsEligible { get; set; }
-
     }
 }
