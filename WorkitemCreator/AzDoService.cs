@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.TeamFoundation.Core.WebApi;
@@ -15,11 +16,10 @@
 
     public class AzDoService
     {
-        public string ProjectCollectionName { get; set; }
         public string ProjectName { get; set; }
         public Guid ProjectId { get; set; }
         public string TeamName { get; set; }
-        
+
         private VssConnection _connection;
 
         private bool _isConnected;
@@ -66,6 +66,7 @@
         }
 
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public Task<OpResult<List<TeamProjectCollectionReference>>> GetProjectCollectionsAsync()
         {
             throw new NotSupportedException("Getting the project collections requires a different URL than all the other operations, and " +
@@ -105,7 +106,7 @@
             returnValue.Data = projects;
             return returnValue;
         }
-        
+
         public async Task<OpResult<List<WorkItemType>>> GetWorkItemTypesAsync()
         {
             var returnValue = new OpResult<List<WorkItemType>>();
@@ -142,13 +143,31 @@
             return returnValue;
         }
 
-        public async Task<OpResult<List<WorkItemTemplateReference>>> GetTeamWorkitemTemplatesAsync()
+        public async Task<OpResult<WorkItemTemplate>> GetTeamWorkitemTemplateAsync(Guid templateId)
+        {
+            var returnValue = new OpResult<WorkItemTemplate>();
+            if (_isConnected == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors = "Not connected, so cant get template ";
+                return returnValue;
+            }
+
+
+            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var data = await client.GetTemplateAsync(new TeamContext(ProjectName, TeamName), templateId);
+            returnValue.IsOk = true;
+            returnValue.Data = data;
+            return returnValue;
+        }
+
+        public async Task<OpResult<List<WorkItemTemplateReference>>> GetTeamWorkitemTemplateReferencesAsync()
         {
             var returnValue = new OpResult<List<WorkItemTemplateReference>>();
             if (_isConnected == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors = "Not connected, so cant get teams";
+                returnValue.Errors = "Not connected, so cant get template references";
                 return returnValue;
             }
 
@@ -160,7 +179,7 @@
             return returnValue;
         }
 
-        
+
         public async Task<OpResult<List<WorkItemClassificationNode>>> GetIterationsAsync()
         {
             return await GetClassificationNodes(TreeNodeStructureType.Iteration);
@@ -185,7 +204,7 @@
             var rootClassificationNodes = (await client.GetRootNodesAsync(ProjectName)).ToList();
             var root = rootClassificationNodes.First(r => r.StructureType == nodeType);
 
-            var nodes = await client.GetClassificationNodesAsync(ProjectName, new[] { root.Id }, depth: 20);
+            var nodes = await client.GetClassificationNodesAsync(ProjectName, new[] { root.Id }, 20);
             returnValue.IsOk = true;
             returnValue.Data = nodes;
             return returnValue;
@@ -208,6 +227,22 @@
             return returnValue;
         }
 
+        public async Task<OpResult<WorkItem>> CreateWorkitemFromTemplateAsync(string workItemType, string fields)
+        {
+            var returnValue = new OpResult<WorkItem>();
+            if (_isConnected == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors = "Not connected, so cant create workitem from template";
+                return returnValue;
+            }
 
+
+            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var data = await client.GetWorkItemTemplateAsync(ProjectName, workItemType, fields);
+            returnValue.IsOk = true;
+            returnValue.Data = data;
+            return returnValue;
+        }
     }
 }

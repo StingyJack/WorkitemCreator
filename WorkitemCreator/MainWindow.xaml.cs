@@ -9,6 +9,7 @@
     using System.Windows;
     using System.Windows.Controls;
     using Microsoft.TeamFoundation.Core.WebApi;
+    using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -45,18 +46,9 @@
             //    };
             //    WorkItemTemplates.Items.Add(childTab);
             //}
-            var templateSelectorControl = new TemplateSelector();
-            var tab = new TabItem
-            {
-                Header = "Example",
-                Content = templateSelectorControl,
-                HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                VerticalContentAlignment = VerticalAlignment.Stretch
-            };
+           
 
-            WorkItemTemplates.Items.Add(tab);
-
-            WriteStatus("Templates loaded from config");
+            WriteStatus("Configuration loaded, connect to Azure DevOps to continue");
         }
 
         private void WriteStatus(string message)
@@ -181,36 +173,82 @@
                 TeamsList.SelectedIndex = 0;
             }
         }
-
-
+        
         private async void TeamsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _azDoService.TeamName = ((WebApiTeam)TeamsList.SelectedValue).Name;
 
-            var teamTemplatesResult = await _azDoService.GetTeamWorkitemTemplatesAsync();
+            var teamTemplatesResult = await _azDoService.GetTeamWorkitemTemplateReferencesAsync();
             if (teamTemplatesResult.IsOk == false)
             {
                 ReportError(teamTemplatesResult.Errors, "Failed to get team templates");
                 return;
             }
 
-            foreach (TabItem ti in WorkItemTemplates.Items)
+            var localWitReferences = BuildLocalWitReferences(teamTemplatesResult.Data);
+
+            foreach (var configuredTemplate in _config.Templates)
             {
-                var templateSelector = ti.Content as TemplateSelector;
-                if (templateSelector == null)
+                var witr = localWitReferences.FirstOrDefault(w => w.Id.Equals(configuredTemplate.TemplateId));
+                if (witr == null)
                 {
+                    var deadTab = new TabItem
+                    {
+                        Header = configuredTemplate.TemplateSetName,
+                        Content = $"Configured template {configuredTemplate.TemplateSetName} parent ID was not found in the templates " +
+                                  $"retrieved from the server.",
+                        IsEnabled = false
+                    };
+                    WorkItemTemplates.Items.Add(deadTab);
                     continue;
                 }
-                templateSelector.UpdateFromProjectData(teamTemplatesResult.Data);
-            }
 
-            if (TeamsList.SelectedIndex >= 0)
+                var currentLocalRef = witr.Clone();
+                foreach (var ctc in configuredTemplate.Children)
+                {
+                    var ltc = localWitReferences.FirstOrDefault(w => w.Id.Equals(ctc.TemplateId));
+                    if (ltc == null)
+                    {
+                        continue;
+                    }
+
+                    currentLocalRef.ChildTemplates.Add(ltc.Clone());
+                }
+                currentLocalRef.TemplateSetName = configuredTemplate.TemplateSetName;
+
+                var templateSelectorControl = new TemplateSelector();
+                var tab = new TabItem
+                {
+                    Header = currentLocalRef.TemplateSetName,
+                    Content = templateSelectorControl,
+                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                    VerticalContentAlignment = VerticalAlignment.Stretch
+                };
+                templateSelectorControl.UpdateFromSourceData(teamTemplatesResult.Data, currentLocalRef);
+                WorkItemTemplates.Items.Add(tab);
+            }
+            
+            WorkItemTemplates.IsEnabled = true;
+            
+            if (WorkItemTemplates.Items.Count > 0)
             {
                 WriteStatus("Ready to create!");
                 CreateWorkitems.IsEnabled = true;
-                WorkItemTemplates.IsEnabled = true;
             }
 
+        }
+
+        private List<LocalWiTemplateReference> BuildLocalWitReferences(List<WorkItemTemplateReference> workItemTemplateReferences)
+        {
+            var returnValue = new List<LocalWiTemplateReference>();
+
+            foreach (var witr in workItemTemplateReferences)
+            {
+                var lwitr = new LocalWiTemplateReference(witr);
+                returnValue.Add(lwitr);
+            }
+
+            return returnValue;
         }
 
         private async void CreateWorkitems_Click(object sender, RoutedEventArgs e)
@@ -224,7 +262,7 @@
 
             var wit = witvc.AsTemplateDefinition(false);
             var wm = new WorkitemMaker(_azDoService);
-            var wiCreationResult = await wm.CreateWorkitemAsync(wit);
+            var wiCreationResult = await wm.CreateWorkitemsRawAsync(wit);
 
             MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
         }

@@ -17,7 +17,32 @@
             _azDoService = azDoService ?? throw new ArgumentNullException(nameof(azDoService));
         }
 
-        public async Task<WorkitemCreationResult> CreateWorkitemAsync(WorkitemTemplate wit)
+        public async Task<WorkitemCreationResult> CreateWorkitemsFromTemplate(LocalWiTemplateReference cwitr)
+        {
+            var returnValue = new WorkitemCreationResult();
+
+            if (cwitr == null)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors.Add("Need a parent template to create workitems");
+                return returnValue;
+            }
+
+            var templateResult = await _azDoService.GetTeamWorkitemTemplateAsync(cwitr.Id);
+
+            if (templateResult.IsOk == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors.Add(templateResult.Errors);
+                return returnValue;
+            }
+
+
+            await Task.Delay(1);
+            throw new NotImplementedException("");
+        }
+
+        public async Task<WorkitemCreationResult> CreateWorkitemsRawAsync(WorkitemTemplate wit)
         {
             _ = wit ?? throw new ArgumentNullException(nameof(wit));
 

@@ -5,11 +5,10 @@
 
     public class Config
     {
-        public List<WorkitemTemplate> Templates { get; set; }
+        public List<ConfiguredWitReference> Templates { get; set; }
         public string ServiceUrl { get; set; }
-        public string LastSelectedTeamProjectCollection { get; set; }
         public string LastSelectedTeamProject { get; set; }
-        public bool IncludeStoryNumberInTaskTitle { get; set; }
+        //public bool IncludeStoryNumberInTaskTitle { get; set; }
         [JsonIgnore]
         public string CurrentLogFilePath { get; set; }
         [JsonIgnore]
