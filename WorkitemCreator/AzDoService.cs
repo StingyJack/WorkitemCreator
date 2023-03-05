@@ -180,11 +180,13 @@
         }
 
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public async Task<OpResult<List<WorkItemClassificationNode>>> GetIterationsAsync()
         {
             return await GetClassificationNodes(TreeNodeStructureType.Iteration);
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public async Task<OpResult<List<WorkItemClassificationNode>>> GetAreaPathsAsync()
         {
             return await GetClassificationNodes(TreeNodeStructureType.Area);
@@ -226,23 +228,6 @@
             returnValue.Data = workitem;
             return returnValue;
         }
-
-        public async Task<OpResult<WorkItem>> CreateWorkitemFromTemplateAsync(string workItemType, string fields)
-        {
-            var returnValue = new OpResult<WorkItem>();
-            if (_isConnected == false)
-            {
-                returnValue.IsOk = false;
-                returnValue.Errors = "Not connected, so cant create workitem from template";
-                return returnValue;
-            }
-
-
-            var client = _connection.GetClient<WorkItemTrackingHttpClient>();
-            var data = await client.GetWorkItemTemplateAsync(ProjectName, workItemType, fields);
-            returnValue.IsOk = true;
-            returnValue.Data = data;
-            return returnValue;
-        }
+        
     }
 }

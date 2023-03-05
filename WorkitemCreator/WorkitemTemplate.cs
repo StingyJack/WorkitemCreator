@@ -8,6 +8,7 @@
         public string Name { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+
         public string WorkitemType { get; set; }
         //public string AreaPath { get; set; }
         //public string IterationPath { get; set; }

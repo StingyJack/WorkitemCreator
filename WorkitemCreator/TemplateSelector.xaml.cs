@@ -104,7 +104,6 @@
 
         public LocalWiTemplateReference AsLocalWiTemplateReference()
         {
-            
             var returnValue = ParentWorkItemTemplate.SelectedItem as LocalWiTemplateReference;
             if (returnValue == null)
             {
@@ -131,7 +130,6 @@
                 }
 
                 returnValue.ChildTemplates.Add(cwitr);
-
             }
 
             return returnValue;

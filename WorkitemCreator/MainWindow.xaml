@@ -37,9 +37,7 @@
         </StackPanel>
 
         <TabControl Grid.Row="3" Grid.Column="1" Name="WorkItemTemplates" IsEnabled="False" />
-        <TextBlock Grid.Row="4" Grid.Column="1" Name="LogWindow">
-
-        </TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="1" Name="LogWindow" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="5" Grid.Column="1">
             <Button Name="CreateWorkitems" Content="Create Workitem(s)" Click="CreateWorkitems_Click" IsEnabled="False" />
