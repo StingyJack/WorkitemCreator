@@ -17,25 +17,76 @@
             _azDoService = azDoService ?? throw new ArgumentNullException(nameof(azDoService));
         }
 
-        public async Task<WorkitemCreationResult> CreateWorkitemsFromTemplate(LocalWiTemplateReference cwitr)
+        public async Task<WorkitemCreationResult> CreateWorkitemsFromTemplateAsync(LocalWiTemplateReference parentWiTemplateReference)
         {
             var returnValue = new WorkitemCreationResult();
 
-            if (cwitr == null)
+            if (parentWiTemplateReference == null)
             {
                 returnValue.IsOk = false;
                 returnValue.Errors.Add("Need a parent template to create workitems");
                 return returnValue;
             }
 
-            var templateResult = await _azDoService.GetTeamWorkitemTemplateAsync(cwitr.Id);
+            var parentTemplateResult = await _azDoService.GetTeamWorkitemTemplateAsync(parentWiTemplateReference.Id);
 
-            if (templateResult.IsOk == false)
+            if (parentTemplateResult.IsOk == false)
             {
                 returnValue.IsOk = false;
-                returnValue.Errors.Add(templateResult.Errors);
+                returnValue.Errors.Add(parentTemplateResult.Errors);
                 return returnValue;
             }
+
+            var workitemTypesResult = await _azDoService.GetWorkItemTypesAsync();
+            if (workitemTypesResult.IsOk == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors.Add(workitemTypesResult.Errors);
+                return returnValue;
+            }
+
+            var parentWiType = workitemTypesResult.Data.FirstOrDefault(p => string.Equals(parentWiTemplateReference.WorkItemTypeName, p.Name, StringComparison.OrdinalIgnoreCase));
+            if (parentWiType == null)
+            {
+                returnValue.SetFail($"The parent workitem type {parentWiTemplateReference.WorkItemTypeName} does not exist for project {_azDoService.ProjectName}");
+                return returnValue;
+            }
+
+
+            var parentWorkitemCandidate = BuildWorkitemFromTemplate(parentTemplateResult.Data, parentWiType, ref returnValue);
+
+            WorkItem parentWorkitem;
+            try
+            {
+                var parentWorkitemCreationResult = await _azDoService.CreateWorkitemAsync(parentWorkitemCandidate, parentWiTemplateReference.WorkItemTypeName);
+                if (parentWorkitemCreationResult.IsOk == false)
+                {
+                    returnValue.SetFail(parentWorkitemCreationResult.Errors);
+                    return returnValue;
+                }
+
+                parentWorkitem = parentWorkitemCreationResult.Data;
+                if (parentWorkitem.Id.HasValue == false)
+                {
+                    throw new InvalidOperationException("Parent workitem was not created.");
+                }
+            }
+            catch (Exception e)
+            {
+                returnValue.SetFail(e.ToString());
+                Trace.TraceError(e.ToString());
+                return returnValue;
+            }
+
+            returnValue.WorkitemsCreated.Add(new WorkitemBaseDetails
+            {
+                Id = parentWorkitem.Id.Value,
+                WorkitemTypeName = parentWiTemplateReference.WorkItemTypeName,
+                Uri = parentWorkitem.Url,
+                Title = parentWiTemplateReference.Title
+            });
+            
+
 
 
 
@@ -43,6 +94,45 @@
 
             return returnValue;
 
+        }
+
+        private JsonPatchDocument BuildWorkitemFromTemplate(WorkItemTemplate wit, WorkItemType wiType, ref WorkitemCreationResult returnValue)
+        {
+            var workitemCandidate = new JsonPatchDocument();
+            foreach (var templateField in wit.Fields)
+            {
+                var field = wiType.Fields.FirstOrDefault(f => string.Equals(f.ReferenceName, templateField.Key, StringComparison.OrdinalIgnoreCase));
+                if (field == null)
+                {
+                    returnValue.AddNonTermError($"Could not find a workitem field matching the name {templateField.Key}");
+                    continue;
+                }
+
+                var jpo = new JsonPatchOperation
+                {
+                    Operation = Operation.Add,
+                    Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
+                    Value = templateField.Value
+                };
+
+                if (workitemCandidate.Any(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The value {templateField.Value} will be ignored");
+                    continue;
+                }
+
+
+                workitemCandidate.Add(jpo);
+            }
+
+            workitemCandidate.Add(new JsonPatchOperation
+            {
+                Operation = Operation.Add,
+                Path = "/fields/System.History",
+                Value = "Created with WorkitemCreator",
+            });
+
+            return workitemCandidate;
         }
 
         public async Task<WorkitemCreationResult> CreateWorkitemsRawAsync(WorkitemTemplate wit)
@@ -95,7 +185,7 @@
             returnValue.WorkitemsCreated.Add(new WorkitemBaseDetails
             {
                 Id = parentWorkitem.Id.Value,
-                WorkitemType = wit.WorkitemType,
+                WorkitemTypeName = wit.WorkitemType,
                 Uri = parentWorkitem.Url,
                 Title = wit.Title
             });
@@ -148,7 +238,7 @@
                 returnValue.WorkitemsCreated.Add(new WorkitemBaseDetails
                 {
                     Id = childWorkitem.Id.Value,
-                    WorkitemType = cwit.WorkitemType,
+                    WorkitemTypeName = cwit.WorkitemType,
                     Uri = childWorkitem.Url,
                     Title = cwit.Title
                 });

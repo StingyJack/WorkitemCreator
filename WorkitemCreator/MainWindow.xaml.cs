@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Documents;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Newtonsoft.Json;
@@ -20,6 +22,7 @@
     {
         private readonly Config _config;
         private readonly AzDoService _azDoService;
+
 
         public MainWindow(Config config)
         {
@@ -59,6 +62,7 @@
                 Trace.TraceInformation(line);
                 LastMessage.Content = line;
                 LastMessage.ToolTip = line;
+                LogWindow.Text = $"{line}{Environment.NewLine}{LogWindow.Text}";
                 File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
             });
         }
@@ -116,15 +120,15 @@
             _azDoService.ProjectName = selectedProject.Name;
             _azDoService.ProjectId = selectedProject.Id;
 
-            WriteStatus($"Getting workitem types for project {_azDoService.ProjectName}...");
-            var wiTypeResult = await _azDoService.GetWorkItemTypesAsync();
-            if (wiTypeResult.IsOk == false)
-            {
-                ReportError(wiTypeResult.Errors, $"Failed to get WorkItem types for project {_azDoService.ProjectName}.");
-                return;
-            }
+            //WriteStatus($"Getting workitem types for project {_azDoService.ProjectName}...");
+            //var wiTypeResult = await _azDoService.GetWorkItemTypesAsync();
+            //if (wiTypeResult.IsOk == false)
+            //{
+            //    ReportError(wiTypeResult.Errors, $"Failed to get WorkItem types for project {_azDoService.ProjectName}.");
+            //    return;
+            //}
 
-            WriteStatus($"Got {wiTypeResult.Data.Count} workitem types for project {_azDoService.ProjectName}");
+            //WriteStatus($"Got {wiTypeResult.Data.Count} workitem types for project {_azDoService.ProjectName}");
 
             WriteStatus($"Getting teams for project {_azDoService.ProjectName}...");
             var teamsResult = await _azDoService.GetTeamsAsync();
@@ -139,37 +143,37 @@
             WriteStatus($"Got {teamsResult.Data.Count} teams for project {_azDoService.ProjectName}");
 
 
-            WriteStatus($"Getting iterations for project {_azDoService.ProjectName}...");
-            var iterationsResult = await _azDoService.GetIterationsAsync();
-            if (iterationsResult.IsOk == false)
-            {
-                ReportError(iterationsResult.Errors, $"Failed to get iterations for project {_azDoService.ProjectName}.");
-                return;
-            }
+            //WriteStatus($"Getting iterations for project {_azDoService.ProjectName}...");
+            //var iterationsResult = await _azDoService.GetIterationsAsync();
+            //if (iterationsResult.IsOk == false)
+            //{
+            //    ReportError(iterationsResult.Errors, $"Failed to get iterations for project {_azDoService.ProjectName}.");
+            //    return;
+            //}
 
-            WriteStatus($"Got {iterationsResult.Data.Count} iterations for project {_azDoService.ProjectName}");
+            //WriteStatus($"Got {iterationsResult.Data.Count} iterations for project {_azDoService.ProjectName}");
 
-            WriteStatus($"Getting area paths for project {_azDoService.ProjectName}...");
-            var areaPathsResult = await _azDoService.GetAreaPathsAsync();
-            if (areaPathsResult.IsOk == false)
-            {
-                ReportError(areaPathsResult.Errors, $"Failed to get area paths for project {_azDoService.ProjectName}.");
-                return;
-            }
+            //WriteStatus($"Getting area paths for project {_azDoService.ProjectName}...");
+            //var areaPathsResult = await _azDoService.GetAreaPathsAsync();
+            //if (areaPathsResult.IsOk == false)
+            //{
+            //    ReportError(areaPathsResult.Errors, $"Failed to get area paths for project {_azDoService.ProjectName}.");
+            //    return;
+            //}
 
-            WriteStatus($"Got {areaPathsResult.Data.Count} area paths for project {_azDoService.ProjectName}");
+            //WriteStatus($"Got {areaPathsResult.Data.Count} area paths for project {_azDoService.ProjectName}");
 
 
-            foreach (TabItem ti in WorkItemTemplates.Items)
-            {
-                var witvc = ti.Content as WorkitemTemplateViewControl;
-                if (witvc == null)
-                {
-                    continue;
-                }
+            //foreach (TabItem ti in WorkItemTemplates.Items)
+            //{
+            //    var witvc = ti.Content as WorkitemTemplateViewControl;
+            //    if (witvc == null)
+            //    {
+            //        continue;
+            //    }
 
-                witvc.UpdateWithProjectConfiguration(wiTypeResult.Data, iterationsResult.Data, areaPathsResult.Data);
-            }
+            //    witvc.UpdateWithProjectConfiguration(wiTypeResult.Data, iterationsResult.Data, areaPathsResult.Data);
+            //}
 
             if (TeamsList.SelectedIndex < 0 && TeamsList.Items.Count > 0)
             {
@@ -256,10 +260,12 @@
 
         private async void CreateWorkitems_Click(object sender, RoutedEventArgs e)
         {
+            CreateWorkitems.IsEnabled = false;
             var witvc = WorkItemTemplates.SelectedContent as TemplateSelector;
             if (witvc == null)
             {
                 WriteStatus("No template selected");
+                CreateWorkitems.IsEnabled = true;
                 return;
             }
 
@@ -267,12 +273,23 @@
             if (wit == null)
             {
                 ReportError("Please make sure a parent template is selected.", "Unable to create workitems");
+                CreateWorkitems.IsEnabled = true;
+
                 return;
             }
+
             var wm = new WorkitemMaker(_azDoService);
-            var wiCreationResult = await wm.CreateWorkitemsFromTemplate(wit);
+            var wiCreationResult = await wm.CreateWorkitemsFromTemplateAsync(wit);
+            if (wiCreationResult.IsOk == false)
+            {
+                ReportError(string.Join("\n", wiCreationResult.Errors), "Problems when creating workitems.");
+                CreateWorkitems.IsEnabled = true;
+                return;
+            }
 
             MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
+
+            CreateWorkitems.IsEnabled = true;
         }
     }
 }
