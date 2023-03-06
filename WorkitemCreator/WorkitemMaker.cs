@@ -41,7 +41,10 @@
 
             var parentWorkitemCreationResult = await CreateWorkitemFromTemplateAsync(parentWiTemplateReference, workitemTypesResult.Data);
             returnValue.Merge(parentWorkitemCreationResult);
-
+            if (parentWorkitemCreationResult.IsOk == false)
+            {
+                return returnValue;
+            }
 
             foreach (var child in parentWiTemplateReference.ChildTemplates)
             {
@@ -64,8 +67,7 @@
 
             if (workitemTemplateResult.IsOk == false)
             {
-                returnValue.IsOk = false;
-                returnValue.Errors = workitemTemplateResult.Errors;
+                returnValue.SetFail(workitemTemplateResult.Errors);
                 return returnValue;
             }
 
@@ -73,6 +75,27 @@
             if (wiType == null)
             {
                 returnValue.SetFail($"The workitem type {wiTemplateReference.WorkItemTypeName} does not exist for project {_azDoService.ProjectName}");
+                return returnValue;
+            }
+
+            var requiredFields = wiType.Fields.Where(f => f.AlwaysRequired && string.IsNullOrWhiteSpace(f.DefaultValue)).ToList();
+            var reqFieldMissingErrors = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var reqField in requiredFields)
+            {
+                if (workitemTemplateResult.Data.Fields.Any(k => reqField.ReferenceName.Equals(k.Key, StringComparison.OrdinalIgnoreCase)
+                                                                || reqField.Name.Equals(k.Key, StringComparison.OrdinalIgnoreCase)) == false)
+                {
+                    if (reqFieldMissingErrors.ContainsKey(reqField.Name) == false)
+                    {
+                        reqFieldMissingErrors.Add(reqField.Name, $"Template {wiTemplateReference.Name} does not define a value for required field {reqField.Name}. " +
+                                                                 $"Cannot create a {wiType.Name} workitem.");
+                    }
+                }
+            }
+
+            if (reqFieldMissingErrors.Count > 0)
+            {
+                returnValue.SetFail(string.Join("\n", reqFieldMissingErrors.Values));
                 return returnValue;
             }
 

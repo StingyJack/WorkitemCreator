@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Xml;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Newtonsoft.Json;
@@ -259,6 +260,7 @@
         private async void CreateWorkitems_Click(object sender, RoutedEventArgs e)
         {
             CreateWorkitems.IsEnabled = false;
+            WriteStatus("Creating workitems...");
             var witvc = WorkItemTemplates.SelectedContent as TemplateSelector;
             if (witvc == null)
             {
@@ -286,7 +288,7 @@
             }
 
             MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
-
+            WriteStatus("Workitems Created!");
             CreateWorkitems.IsEnabled = true;
         }
     }
