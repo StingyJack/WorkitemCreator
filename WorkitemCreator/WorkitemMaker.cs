@@ -5,6 +5,7 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Microsoft.VisualStudio.Services.WebApi.Patch;
     using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
@@ -45,7 +46,12 @@
             foreach (var child in parentWiTemplateReference.ChildTemplates)
             {
                 var childWorkitemCreationResult = await CreateWorkitemFromTemplateAsync(child, workitemTypesResult.Data, parentWorkitemCreationResult.Data.Uri);
+
                 returnValue.Merge(childWorkitemCreationResult);
+                if (childWorkitemCreationResult.IsOk == false)
+                {
+                    break;
+                }
             }
 
             return returnValue;
@@ -101,6 +107,12 @@
                 {
                     throw new InvalidOperationException("Workitem was not created, Id is null.");
                 }
+            }
+            catch (RuleValidationException rve)
+            {
+                returnValue.SetFail(rve.Message);
+                Trace.TraceError(rve.ToString());
+                return returnValue;
             }
             catch (Exception e)
             {

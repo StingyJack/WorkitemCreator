@@ -228,6 +228,5 @@
             returnValue.Data = workitem;
             return returnValue;
         }
-        
     }
 }

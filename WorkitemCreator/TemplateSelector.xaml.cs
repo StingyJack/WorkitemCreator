@@ -41,18 +41,18 @@
 
         private void AddChildWorkitemTemplateUiControls(LocalWiTemplateReference existingConfiguredChildTemplate = null)
         {
-            var insertionIndex = ChildTemplates.Children.Count;
+            var insertionIndex = ChildTemplates.RowDefinitions.Count;
             ChildTemplates.RowDefinitions.Add(new RowDefinition());
 
 
-            var hiddenIndex = new Label
-            {
-                Content = insertionIndex,
-                Visibility = Visibility.Collapsed,
-            };
-            ChildTemplates.Children.Add(hiddenIndex);
-            Grid.SetRow(hiddenIndex, insertionIndex);
-            Grid.SetColumn(hiddenIndex, 0);
+            //var hiddenIndex = new Label
+            //{
+            //    Content = insertionIndex,
+            //    Visibility = Visibility.Collapsed,
+            //};
+            //ChildTemplates.Children.Add(hiddenIndex);
+            //Grid.SetRow(hiddenIndex, insertionIndex);
+            //Grid.SetColumn(hiddenIndex, 0);
 
             var caption = new Label
             {
@@ -84,7 +84,8 @@
             {
                 Content = "Remove",
                 Height = 25,
-                Margin = new Thickness(4)
+                Margin = new Thickness(4),
+                Tag = insertionIndex
             };
             btn.Click += ChildWorkitemTemplate_Remove;
             ChildTemplates.Children.Add(btn);
@@ -95,10 +96,10 @@
         private void ChildWorkitemTemplate_Remove(object sender, RoutedEventArgs e)
         {
             //this is the "row" that was built by the AddChildWorkitemTemplateUiControls
-            // Button-> Parent StackPanel -> StackPanel's first child element, a label -> its content
-            var removeIndex = Convert.ToInt32(((Label)((StackPanel)((Button)e.Source).Parent).Children[0]).Content);
 
-            ChildTemplates.Children.RemoveAt(removeIndex);
+            var removeIndex = Convert.ToInt32(((Button)e.Source).Tag);
+
+            ChildTemplates.RowDefinitions.RemoveAt(removeIndex);
         }
 
 
