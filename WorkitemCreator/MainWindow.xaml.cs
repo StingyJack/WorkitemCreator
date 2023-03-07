@@ -8,10 +8,8 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Xml;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -287,8 +285,12 @@
                 return;
             }
 
-            MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
+            //MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
             WriteStatus("Workitems Created!");
+            foreach (var wi in wiCreationResult.WorkitemsCreated)
+            {
+                WriteStatus($"Created workitem: {wi.Uri}");
+            }
             CreateWorkitems.IsEnabled = true;
         }
     }

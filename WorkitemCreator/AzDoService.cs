@@ -228,5 +228,22 @@
             returnValue.Data = workitem;
             return returnValue;
         }
+
+        public async Task<OpResult<WorkItem>> GetWorkitemFromBaseTemplateAsync(string workItemType)
+        {
+            var returnValue = new OpResult<WorkItem>();
+            if (_isConnected == false)
+            {
+                returnValue.IsOk = false;
+                returnValue.Errors = "Not connected, so cant create a workitem";
+                return returnValue;
+            }
+
+            var witc = _connection.GetClient<WorkItemTrackingHttpClient>();
+            var workitem = await witc.GetWorkItemTemplateAsync(ProjectName, workItemType);
+            returnValue.IsOk = true;
+            returnValue.Data = workitem;
+            return returnValue;
+        }
     }
 }

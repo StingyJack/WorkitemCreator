@@ -78,28 +78,14 @@
                 return returnValue;
             }
 
-            var requiredFields = wiType.Fields.Where(f => f.AlwaysRequired && string.IsNullOrWhiteSpace(f.DefaultValue)).ToList();
-            var reqFieldMissingErrors = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var reqField in requiredFields)
+            var workitemFromTemplateResult = await _azDoService.GetWorkitemFromBaseTemplateAsync(wiType.Name);
+            if (workitemFromTemplateResult.IsOk == false)
             {
-                if (workitemTemplateResult.Data.Fields.Any(k => reqField.ReferenceName.Equals(k.Key, StringComparison.OrdinalIgnoreCase)
-                                                                || reqField.Name.Equals(k.Key, StringComparison.OrdinalIgnoreCase)) == false)
-                {
-                    if (reqFieldMissingErrors.ContainsKey(reqField.Name) == false)
-                    {
-                        reqFieldMissingErrors.Add(reqField.Name, $"Template {wiTemplateReference.Name} does not define a value for required field {reqField.Name}. " +
-                                                                 $"Cannot create a {wiType.Name} workitem.");
-                    }
-                }
-            }
-
-            if (reqFieldMissingErrors.Count > 0)
-            {
-                returnValue.SetFail(string.Join("\n", reqFieldMissingErrors.Values));
+                returnValue.SetFail(workitemFromTemplateResult.Errors);
                 return returnValue;
             }
-
-            var workitemCandidate = BuildWorkitemFromTemplate(workitemTemplateResult.Data, wiType, ref returnValue);
+            
+            var workitemCandidate = BuildWorkitemFromTemplate(workitemFromTemplateResult.Data, workitemTemplateResult.Data, wiType, ref returnValue);
             if (string.IsNullOrWhiteSpace(parentUrl) == false)
             {
                 var parentRelation = new JsonPatchOperation
@@ -155,33 +141,19 @@
             return returnValue;
         }
 
-        private JsonPatchDocument BuildWorkitemFromTemplate(WorkItemTemplate wit, WorkItemType wiType, ref WorkitemCreationResult returnValue)
+        private JsonPatchDocument BuildWorkitemFromTemplate(WorkItem workitemFromTemplate, WorkItemTemplate wit, WorkItemType wiType, ref WorkitemCreationResult returnValue)
         {
             var workitemCandidate = new JsonPatchDocument();
+            foreach (var wiField in workitemFromTemplate.Fields)
+            {
+                ApplyFieldToCandidate(wiType, returnValue, wiField, workitemCandidate);
+            }
+
             foreach (var templateField in wit.Fields)
             {
-                var field = wiType.Fields.FirstOrDefault(f => string.Equals(f.ReferenceName, templateField.Key, StringComparison.OrdinalIgnoreCase));
-                if (field == null)
-                {
-                    returnValue.AddNonTermError($"Could not find a workitem field matching the name {templateField.Key}");
-                    continue;
-                }
+                var tfKvp = new KeyValuePair<string, object>(templateField.Key, templateField.Value);
 
-                var jpo = new JsonPatchOperation
-                {
-                    Operation = Operation.Add,
-                    Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
-                    Value = templateField.Value
-                };
-
-                if (workitemCandidate.Any(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The value {templateField.Value} will be ignored");
-                    continue;
-                }
-
-
-                workitemCandidate.Add(jpo);
+                ApplyFieldToCandidate(wiType, returnValue, tfKvp, workitemCandidate);
             }
 
             workitemCandidate.Add(new JsonPatchOperation
@@ -192,6 +164,35 @@
             });
 
             return workitemCandidate;
+        }
+
+        private static void ApplyFieldToCandidate(WorkItemType wiType, WorkitemCreationResult returnValue, KeyValuePair<string, object> wiField, JsonPatchDocument workitemCandidate)
+        {
+            var field = wiType.Fields.FirstOrDefault(f => string.Equals(f.ReferenceName, wiField.Key, StringComparison.OrdinalIgnoreCase));
+            if (field == null)
+            {
+                returnValue.AddNonTermError($"Could not find a workitem field matching the name {wiField.Key}");
+                return;
+            }
+
+            var existingPatchRecord = workitemCandidate.FirstOrDefault(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase));
+
+            if (existingPatchRecord != null)
+            {
+                workitemCandidate.Remove(existingPatchRecord);
+                returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The previous value will be ignored");
+//                    continue;
+            }
+
+            var jpo = new JsonPatchOperation
+            {
+                Operation = Operation.Add,
+                Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
+                Value = wiField.Value
+            };
+
+
+            workitemCandidate.Add(jpo);
         }
 
         // ReSharper disable once UnusedMember.Global
