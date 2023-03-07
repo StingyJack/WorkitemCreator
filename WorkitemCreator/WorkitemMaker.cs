@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+    using Microsoft.VisualStudio.Services.WebApi;
     using Microsoft.VisualStudio.Services.WebApi.Patch;
     using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 
@@ -134,7 +135,7 @@
             {
                 Id = workitem.Id.Value,
                 Title = Convert.ToString(workitem.Fields["System.Title"]),
-                Uri = workitem.Url,
+                Uri = ((ReferenceLink)workitem.Links.Links["html"]).Href,
                 WorkitemTypeName = wiTemplateReference.WorkItemTypeName
             };
             returnValue.IsOk = true;

@@ -9,9 +9,11 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
+    using System.Windows.Forms.VisualStyles;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Process = System.Diagnostics.Process;
+    using VerticalAlignment = System.Windows.VerticalAlignment;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -53,11 +55,11 @@
             WriteStatus("Configuration loaded, connect to Azure DevOps to continue");
         }
 
-        private void WriteStatus(string message)
+        private void WriteStatus(string rawMessage, params string[] hyperlinkTextLabels)
         {
             Dispatcher.Invoke(() =>
             {
-                var line = $"{DateTime.Now:HH:mm:ss} - {message}";
+                var line = $"{DateTime.Now:HH:mm:ss} - {rawMessage}";
                 Trace.TraceInformation(line);
                 LastMessage.Content = line;
                 LastMessage.ToolTip = line;
@@ -66,7 +68,7 @@
                     LogWindow.Inlines.Add(new Run(string.Empty));
                 }
                 LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, new LineBreak());
-
+                var linkLabels = new List<string>(hyperlinkTextLabels);
                 var parsedLine = line.Split(' ');
                 for (var i = parsedLine.Length - 1; i >= 0; i--)
                 {
@@ -85,14 +87,23 @@
                         var hl = new Hyperlink
                         {
                             NavigateUri = uri
-
                         };
+                        var hlTextLabel = uri.ToString();
+                        if (linkLabels.Count > 0)
+                        {
+                            hlTextLabel = linkLabels[linkLabels.Count -1];
+                            linkLabels.RemoveAt(linkLabels.Count -1);
+                        }
+
+                        hl.Inlines.Add($"{hlTextLabel}");
                         hl.RequestNavigate += (sender, args) =>
                         {
                             Process.Start(new ProcessStartInfo(args.Uri.AbsoluteUri));
                             args.Handled = true;
                         };
+                        LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, new Run(" "));
                         LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, hl);
+                        LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, new Run(" "));
                     }
                     else
                     {
@@ -120,7 +131,7 @@
         private async void ConnectToAzDo_Click(object sender, RoutedEventArgs e)
         {
             var serviceUrl = ServiceUrl.Text.Trim();
-            WriteStatus($"Connecting to {serviceUrl}...");
+            WriteStatus($"Connecting to {serviceUrl} ...");
 
             ConnectionState.Content = "Connecting";
 
@@ -334,7 +345,7 @@
             WriteStatus("Workitems Created!");
             foreach (var wi in wiCreationResult.WorkitemsCreated)
             {
-                WriteStatus($"Created workitem: {wi.Uri}");
+                WriteStatus($"Created workitem: {wi.Uri}", $"{wi.Id} - {wi.WorkitemTypeName} - {wi.Title}");
             }
             CreateWorkitems.IsEnabled = true;
         }
