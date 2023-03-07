@@ -8,8 +8,10 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Documents;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+    using Process = System.Diagnostics.Process;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -59,7 +61,50 @@
                 Trace.TraceInformation(line);
                 LastMessage.Content = line;
                 LastMessage.ToolTip = line;
-                LogWindow.Text = $"{line}{Environment.NewLine}{LogWindow.Text}";
+                if (LogWindow.Inlines.Count <= 0)
+                {
+                    LogWindow.Inlines.Add(new Run(string.Empty));
+                }
+                LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, new LineBreak());
+
+                var parsedLine = line.Split(' ');
+                for (var i = parsedLine.Length - 1; i >= 0; i--)
+                {
+                    var segment = parsedLine[i];
+
+                    var segmentOnlyRun = new Run($" {segment}");
+                    if (segment.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                        || segment.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Uri uri;
+                        if (Uri.TryCreate(segment, UriKind.Absolute, out uri) == false)
+                        {
+                            LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, segmentOnlyRun);
+                            continue;
+                        }
+                        var hl = new Hyperlink
+                        {
+                            NavigateUri = uri
+
+                        };
+                        hl.RequestNavigate += (sender, args) =>
+                        {
+                            Process.Start(new ProcessStartInfo(args.Uri.AbsoluteUri));
+                            args.Handled = true;
+                        };
+                        LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, hl);
+                    }
+                    else
+                    {
+                        if (LogWindow.Inlines.Count <= 0)
+                        {
+                            LogWindow.Inlines.Add(new Run(string.Empty));
+                        }
+                        LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, segmentOnlyRun);
+                    }
+                }
+
+                //LogWindow.Text = $"{line}{Environment.NewLine}{LogWindow.Text}";
                 File.AppendAllLines(_config.CurrentLogFilePath, new List<string> { line });
             });
         }
