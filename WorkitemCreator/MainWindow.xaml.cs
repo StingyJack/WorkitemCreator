@@ -349,5 +349,16 @@
             }
             CreateWorkitems.IsEnabled = true;
         }
+
+        private void AddTemplateSet_OnClick(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void SaveConfig_OnClick(object sender, RoutedEventArgs e)
+        {
+            
+
+        }
     }
 }

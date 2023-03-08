@@ -40,9 +40,16 @@
         <ScrollViewer Grid.Row="4" Grid.Column="1" >
             <TextBlock Name="LogWindow" />
         </ScrollViewer>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="5" Grid.Column="1">
-            <Button Name="CreateWorkitems" Content="Create Workitem(s)" Click="CreateWorkitems_Click" IsEnabled="False" />
-        </StackPanel>
+        <Grid Grid.Row="5" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Name="AddTemplateSet" Content="Add Template Set" Click="AddTemplateSet_OnClick" Grid.Row="0" Grid.Column="0" IsEnabled="False" />
+            <Button Name="SaveConfig" Content="Save Config" Click="SaveConfig_OnClick" Grid.Row="0" Grid.Column="1"  IsEnabled="False"/>
+            <Button Name="CreateWorkitems" Content="Create Workitem(s)" Click="CreateWorkitems_Click" IsEnabled="False" Grid.Row="0" Grid.Column="2"/>
+        </Grid>
         <StatusBar Name="StatusBar" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="0"
                    Grid.ColumnSpan="3" Grid.Row="6">
             <StatusBarItem MinWidth="50">
