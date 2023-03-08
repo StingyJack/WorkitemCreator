@@ -4,7 +4,7 @@
     using System.Windows.Controls;
 
     /// <summary>
-    /// Interaction logic for AdditionalFieldAndValue.xaml
+    ///     Interaction logic for AdditionalFieldAndValue.xaml
     /// </summary>
     public partial class AdditionalFieldAndValue
     {

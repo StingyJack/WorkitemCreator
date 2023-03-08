@@ -85,7 +85,7 @@
                 returnValue.SetFail(workitemFromTemplateResult.Errors);
                 return returnValue;
             }
-            
+
             var workitemCandidate = BuildWorkitemFromTemplate(workitemFromTemplateResult.Data, workitemTemplateResult.Data, wiType, ref returnValue);
             if (string.IsNullOrWhiteSpace(parentUrl) == false)
             {

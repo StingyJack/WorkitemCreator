@@ -9,7 +9,7 @@
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
     /// <summary>
-    /// Interaction logic for WorkitemTemplateViewControl.xaml
+    ///     Interaction logic for WorkitemTemplateViewControl.xaml
     /// </summary>
     public partial class WorkitemTemplateViewControl
     {

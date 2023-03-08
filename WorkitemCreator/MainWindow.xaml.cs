@@ -9,19 +9,18 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
-    using System.Windows.Forms.VisualStyles;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+    using Newtonsoft.Json;
     using Process = System.Diagnostics.Process;
-    using VerticalAlignment = System.Windows.VerticalAlignment;
 
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public partial class MainWindow
     {
-        private readonly Config _config;
+        private Config _config;
         private readonly AzDoService _azDoService;
 
 
@@ -67,6 +66,7 @@
                 {
                     LogWindow.Inlines.Add(new Run(string.Empty));
                 }
+
                 LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, new LineBreak());
                 var linkLabels = new List<string>(hyperlinkTextLabels);
                 var parsedLine = line.Split(' ');
@@ -84,15 +84,13 @@
                             LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, segmentOnlyRun);
                             continue;
                         }
-                        var hl = new Hyperlink
-                        {
-                            NavigateUri = uri
-                        };
+
+                        var hl = new Hyperlink { NavigateUri = uri };
                         var hlTextLabel = uri.ToString();
                         if (linkLabels.Count > 0)
                         {
-                            hlTextLabel = linkLabels[linkLabels.Count -1];
-                            linkLabels.RemoveAt(linkLabels.Count -1);
+                            hlTextLabel = linkLabels[linkLabels.Count - 1];
+                            linkLabels.RemoveAt(linkLabels.Count - 1);
                         }
 
                         hl.Inlines.Add($"{hlTextLabel}");
@@ -111,6 +109,7 @@
                         {
                             LogWindow.Inlines.Add(new Run(string.Empty));
                         }
+
                         LogWindow.Inlines.InsertBefore(LogWindow.Inlines.FirstInline, segmentOnlyRun);
                     }
                 }
@@ -296,6 +295,8 @@
                 WriteStatus("Ready to create!");
                 CreateWorkitems.IsEnabled = true;
             }
+
+            SaveConfig.IsEnabled = true;
         }
 
         private List<LocalWiTemplateReference> BuildLocalWitReferences(List<WorkItemTemplateReference> workItemTemplateReferences)
@@ -347,18 +348,66 @@
             {
                 WriteStatus($"Created workitem: {wi.Uri}", $"{wi.Id} - {wi.WorkitemTypeName} - {wi.Title}");
             }
+
             CreateWorkitems.IsEnabled = true;
         }
 
         private void AddTemplateSet_OnClick(object sender, RoutedEventArgs e)
         {
-            
         }
 
         private void SaveConfig_OnClick(object sender, RoutedEventArgs e)
         {
-            
+            var updatedConfig = new Config
+            {
+                ServiceUrl = ServiceUrl.Text.Trim(),
+                LastSelectedTeamProject = TeamProjectList.Text.Trim(),
+                Templates = new List<ConfiguredWitReference>()
+            };
+            var currentIndex = 0;
+            foreach (var rawTabItem in WorkItemTemplates.Items)
+            {
+                currentIndex++;
+                var tabItem = (TabItem)rawTabItem;
+                if (tabItem.HasHeader == false)
+                {
+                    WriteStatus($"Template Set at position {currentIndex} is missing a header and will be skipped.");
 
+                    continue;
+                }
+
+                var templateSetName = tabItem.Header.ToString();
+                if (string.IsNullOrEmpty(templateSetName))
+                {
+                    ReportError($"Template Set at position {currentIndex} is missing a name and will be skipped.", "Cant save one of the template sets.");
+                    continue;
+                }
+
+                var templateSelectorControl = tabItem.Content as TemplateSelector;
+                if (templateSelectorControl == null)
+                {
+                    WriteStatus($"Template Set {templateSetName} is not a {nameof(TemplateSelector)} control and cant be read");
+                    continue;
+                }
+
+                var localWiTemplateReference = templateSelectorControl.AsLocalWiTemplateReference();
+                var configuredWitReference = new ConfiguredWitReference
+                {
+                    TemplateSetName = templateSetName,
+                    TemplateId = localWiTemplateReference.Id
+                };
+                foreach (var lwitKid in localWiTemplateReference.ChildTemplates)
+                {
+                    var configKid = new ConfiguredWitReference { TemplateId = lwitKid.Id };
+                    configuredWitReference.Children.Add(configKid);
+                }
+
+                updatedConfig.Templates.Add(configuredWitReference);
+            }
+
+            var jsonned = JsonConvert.SerializeObject(updatedConfig, Formatting.Indented);
+            File.WriteAllText(".\\config.json", jsonned);
+            _config = updatedConfig;
         }
     }
 }

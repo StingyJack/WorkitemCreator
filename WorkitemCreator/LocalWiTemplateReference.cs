@@ -1,16 +1,8 @@
 ﻿namespace WorkitemCreator
 {
-    using System;
     using System.Collections.Generic;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Newtonsoft.Json;
-
-    public class ConfiguredWitReference
-    {
-        public string TemplateSetName { get; set; }
-        public Guid TemplateId { get; set; }
-        public List<ConfiguredWitReference> Children { get; set; } = new List<ConfiguredWitReference>();
-    }
 
     public class LocalWiTemplateReference : WorkItemTemplateReference
     {

@@ -5,10 +5,10 @@
 
     public class Config
     {
-        public List<ConfiguredWitReference> Templates { get; set; }
-        public string ServiceUrl { get; set; }
+        [JsonProperty(Order = 0)] public string ServiceUrl { get; set; }
+        [JsonProperty(Order = 1)] public string LastSelectedTeamProject { get; set; }
 
-        public string LastSelectedTeamProject { get; set; }
+        [JsonProperty(Order = 2)] public List<ConfiguredWitReference> Templates { get; set; }
 
         //public bool IncludeStoryNumberInTaskTitle { get; set; }
         [JsonIgnore] public string CurrentLogFilePath { get; set; }

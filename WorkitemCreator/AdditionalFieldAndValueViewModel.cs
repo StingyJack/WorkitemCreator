@@ -18,7 +18,7 @@
         public string Value { get; set; }
 
         /// <summary>
-        ///     True if the field should be included when creating workitems. 
+        ///     True if the field should be included when creating workitems.
         /// </summary>
         public bool IncludeWhenCreating { get; set; }
 

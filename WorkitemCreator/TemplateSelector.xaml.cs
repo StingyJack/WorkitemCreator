@@ -7,7 +7,7 @@
     using System.Windows.Controls;
 
     /// <summary>
-    /// Interaction logic for TemplateSelector.xaml
+    ///     Interaction logic for TemplateSelector.xaml
     /// </summary>
     public partial class TemplateSelector
     {
@@ -43,16 +43,6 @@
         {
             var insertionIndex = ChildTemplates.RowDefinitions.Count;
             ChildTemplates.RowDefinitions.Add(new RowDefinition());
-
-
-            //var hiddenIndex = new Label
-            //{
-            //    Content = insertionIndex,
-            //    Visibility = Visibility.Collapsed,
-            //};
-            //ChildTemplates.Children.Add(hiddenIndex);
-            //Grid.SetRow(hiddenIndex, insertionIndex);
-            //Grid.SetColumn(hiddenIndex, 0);
 
             var caption = new Label
             {
