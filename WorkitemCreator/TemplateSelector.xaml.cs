@@ -98,7 +98,7 @@
             var returnValue = ParentWorkItemTemplate.SelectedItem as LocalWiTemplateReference;
             if (returnValue == null)
             {
-                return null;
+                return new LocalWiTemplateReference();
             }
 
             foreach (var childItem in ChildTemplates.Children)

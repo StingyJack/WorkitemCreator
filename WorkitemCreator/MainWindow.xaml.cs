@@ -202,7 +202,7 @@
                 return;
             }
 
-            TeamsList.ItemsSource = teamsResult.Data;
+            TeamsList.ItemsSource = teamsResult.Data.OrderBy(t => t.Name);
             TeamsList.IsEnabled = true;
             WriteStatus($"Got {teamsResult.Data.Count} teams for project {_azDoService.ProjectName}");
 
@@ -247,6 +247,13 @@
 
         private async void TeamsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (TeamsList.SelectedIndex < 0)
+            {
+                SaveConfig.IsEnabled = false;
+                AddTemplateSet.IsEnabled = false;
+                return;
+            }
+
             _azDoService.TeamName = ((WebApiTeam)TeamsList.SelectedValue).Name;
 
             var teamTemplatesResult = await _azDoService.GetTeamWorkitemTemplateReferencesAsync();
@@ -389,6 +396,8 @@
             WorkItemTemplates.Items.Add(tabItem);
             WorkItemTemplates.SelectedIndex = WorkItemTemplates.Items.Count - 1;
             NewTemplateSetName.Text = string.Empty;
+            WriteStatus("Ready to create!");
+            CreateWorkitems.IsEnabled = true;
         }
 
         private void SaveConfig_OnClick(object sender, RoutedEventArgs e)
