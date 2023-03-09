@@ -50,6 +50,8 @@
                     Grid.Column="0" IsEnabled="False" />
             <Button Name="SaveConfig" Content="Save Config" Click="SaveConfig_OnClick" Grid.Row="0" Grid.Column="1"
                     IsEnabled="False" />
+            <TextBox Name="NewTemplateSetName" Grid.Row="0" Grid.Column="1" Visibility="Collapsed" KeyDown="NewTemplateSetName_OnKeyDown" 
+                     FocusVisualStyle="{DynamicResource VisualFocus}"/>
             <Button Name="CreateWorkitems" Content="Create Workitem(s)" Click="CreateWorkitems_Click" IsEnabled="False"
                     Grid.Row="0" Grid.Column="2" />
         </Grid>
@@ -157,6 +159,15 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="3" />
             <Setter Property="Padding" Value="3" />
+        </Style>
+        <Style x:Key="VisualFocus">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="-2" StrokeThickness="1" Stroke="Green"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 </Window>

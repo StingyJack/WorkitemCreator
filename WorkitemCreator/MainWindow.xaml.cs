@@ -9,6 +9,8 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Documents;
+    using System.Windows.Input;
+    using System.Windows.Media;
     using Microsoft.TeamFoundation.Core.WebApi;
     using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
     using Newtonsoft.Json;
@@ -20,9 +22,11 @@
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public partial class MainWindow
     {
+        #region "fields and loading"
+
         private Config _config;
         private readonly AzDoService _azDoService;
-
+        private List<LocalWiTemplateReference> _localWitReferences = new List<LocalWiTemplateReference>();
 
         public MainWindow(Config config)
         {
@@ -53,6 +57,10 @@
 
             WriteStatus("Configuration loaded, connect to Azure DevOps to continue");
         }
+
+        #endregion //#region "fields and loading"
+
+        #region "logging"
 
         private void WriteStatus(string rawMessage, params string[] hyperlinkTextLabels)
         {
@@ -126,6 +134,10 @@
 
             MessageBox.Show(errorMessage, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+
+        #endregion //#region "logging"
+
+        #region "event handlers"
 
         private async void ConnectToAzDo_Click(object sender, RoutedEventArgs e)
         {
@@ -244,11 +256,11 @@
                 return;
             }
 
-            var localWitReferences = BuildLocalWitReferences(teamTemplatesResult.Data);
+            _localWitReferences = BuildLocalWitReferences(teamTemplatesResult.Data);
 
             foreach (var configuredTemplate in _config.Templates)
             {
-                var witr = localWitReferences.FirstOrDefault(w => w.Id.Equals(configuredTemplate.TemplateId));
+                var witr = _localWitReferences.FirstOrDefault(w => w.Id.Equals(configuredTemplate.TemplateId));
                 if (witr == null)
                 {
                     var deadTab = new TabItem
@@ -265,7 +277,7 @@
                 var currentLocalRef = witr.Clone();
                 foreach (var ctc in configuredTemplate.Children)
                 {
-                    var ltc = localWitReferences.FirstOrDefault(w => w.Id.Equals(ctc.TemplateId));
+                    var ltc = _localWitReferences.FirstOrDefault(w => w.Id.Equals(ctc.TemplateId));
                     if (ltc == null)
                     {
                         continue;
@@ -276,15 +288,8 @@
 
                 currentLocalRef.TemplateSetName = configuredTemplate.TemplateSetName;
 
-                var templateSelectorControl = new TemplateSelector();
-                var tab = new TabItem
-                {
-                    Header = currentLocalRef.TemplateSetName,
-                    Content = templateSelectorControl,
-                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                    VerticalContentAlignment = VerticalAlignment.Stretch
-                };
-                templateSelectorControl.UpdateFromSourceData(localWitReferences, currentLocalRef);
+                var tab = CreateTemplateSelectorTabItem(currentLocalRef, out var templateSelectorControl);
+                templateSelectorControl.UpdateFromSourceData(_localWitReferences, currentLocalRef);
                 WorkItemTemplates.Items.Add(tab);
             }
 
@@ -297,19 +302,7 @@
             }
 
             SaveConfig.IsEnabled = true;
-        }
-
-        private List<LocalWiTemplateReference> BuildLocalWitReferences(List<WorkItemTemplateReference> workItemTemplateReferences)
-        {
-            var returnValue = new List<LocalWiTemplateReference>();
-
-            foreach (var witr in workItemTemplateReferences)
-            {
-                var lwitr = new LocalWiTemplateReference(witr);
-                returnValue.Add(lwitr);
-            }
-
-            return returnValue;
+            AddTemplateSet.IsEnabled = true;
         }
 
         private async void CreateWorkitems_Click(object sender, RoutedEventArgs e)
@@ -354,6 +347,48 @@
 
         private void AddTemplateSet_OnClick(object sender, RoutedEventArgs e)
         {
+            SaveConfig.Visibility = Visibility.Collapsed;
+            NewTemplateSetName.Visibility = Visibility.Visible;
+            NewTemplateSetName.Focus();
+            WriteStatus("Enter a name for the template set and press Enter to create it.");
+        }
+
+        private void NewTemplateSetName_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                NewTemplateSetName.Visibility = Visibility.Collapsed;
+                SaveConfig.Visibility = Visibility.Visible;
+                WriteStatus("New template set creation aborted.");
+                return;
+            }
+
+            if (e.Key != Key.Enter)
+            {
+                return;
+            }
+
+            var newTemplateSetName = NewTemplateSetName.Text.Trim();
+            if (string.IsNullOrWhiteSpace(newTemplateSetName))
+            {
+                WriteStatus("A value needs to be provided. Press ESC to abort.");
+                return;
+            }
+
+            //TODO: check to make sure there arent multiple sets with the same name
+
+            NewTemplateSetName.Visibility = Visibility.Collapsed;
+            SaveConfig.Visibility = Visibility.Visible;
+
+            var emptyReference = new LocalWiTemplateReference { TemplateSetName = newTemplateSetName };
+            TemplateSelector templateSelector;
+
+            var tabItem = CreateTemplateSelectorTabItem(emptyReference, out templateSelector);
+            templateSelector.UpdateFromSourceData(_localWitReferences, emptyReference);
+
+            WorkItemTemplates.Items.Add(tabItem);
+            WorkItemTemplates.SelectedIndex = WorkItemTemplates.Items.Count - 1;
+            NewTemplateSetName.Text = string.Empty;
         }
 
         private void SaveConfig_OnClick(object sender, RoutedEventArgs e)
@@ -362,7 +397,9 @@
             {
                 ServiceUrl = ServiceUrl.Text.Trim(),
                 LastSelectedTeamProject = TeamProjectList.Text.Trim(),
-                Templates = new List<ConfiguredWitReference>()
+                Templates = new List<ConfiguredWitReference>(),
+                CurrentLogFilePath = _config.CurrentLogFilePath,
+                AzDoPat = _config.AzDoPat
             };
             var currentIndex = 0;
             foreach (var rawTabItem in WorkItemTemplates.Items)
@@ -408,6 +445,65 @@
             var jsonned = JsonConvert.SerializeObject(updatedConfig, Formatting.Indented);
             File.WriteAllText(".\\config.json", jsonned);
             _config = updatedConfig;
+            WriteStatus("Configuration written to disk");
         }
+
+        #endregion //#region "event handlers"
+
+        #region "helpers"
+
+        private static TabItem CreateTemplateSelectorTabItem(LocalWiTemplateReference currentLocalRef, out TemplateSelector templateSelectorControl)
+        {
+            templateSelectorControl = new TemplateSelector();
+            var dockPanel = new DockPanel();
+            var headerLabel = new Label { Content = currentLocalRef.TemplateSetName };
+            dockPanel.Children.Add(headerLabel);
+
+            DockPanel.SetDock(headerLabel, Dock.Left);
+
+            var closeButton = new Button
+            {
+                Content = "X",
+                Height = 20,
+                Margin = new Thickness(1),
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Top,
+                Background = new SolidColorBrush(Color.FromRgb(244, 140, 150))
+            };
+            closeButton.Click += (o, args) =>
+            {
+                var tabItem = (TabItem)((DockPanel)((Button)args.Source).Parent).Parent;
+
+                ((TabControl)tabItem.Parent).Items.Remove(tabItem);
+
+                args.Handled = true;
+            };
+            dockPanel.Children.Add(closeButton);
+            DockPanel.SetDock(closeButton, Dock.Right);
+            dockPanel.LastChildFill = true;
+            var tab = new TabItem
+            {
+                Header = dockPanel,
+                Content = templateSelectorControl,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                VerticalContentAlignment = VerticalAlignment.Stretch
+            };
+            return tab;
+        }
+
+        private static List<LocalWiTemplateReference> BuildLocalWitReferences(List<WorkItemTemplateReference> workItemTemplateReferences)
+        {
+            var returnValue = new List<LocalWiTemplateReference>();
+
+            foreach (var witr in workItemTemplateReferences)
+            {
+                var lwitr = new LocalWiTemplateReference(witr);
+                returnValue.Add(lwitr);
+            }
+
+            return returnValue;
+        }
+
+        #endregion #region "helpers"
     }
 }
