@@ -12,12 +12,12 @@
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            if (File.Exists("config.json") == false)
+            if (File.Exists(Config.CONFIG_FILE_NAME) == false)
             {
-                throw new FileNotFoundException("Unable to locate configuration", "config.json");
+                throw new FileNotFoundException("Unable to locate configuration", Config.CONFIG_FILE_NAME);
             }
 
-            var configContents = File.ReadAllText("config.json");
+            var configContents = File.ReadAllText(Config.CONFIG_FILE_NAME);
             var config = JsonConvert.DeserializeObject<Config>(configContents);
             config.CurrentLogFilePath = $".\\{nameof(WorkitemCreator)}.{DateTimeOffset.Now:yyyy.MM.dd.HH.mm.ss}.log";
             if (e.Args.Length > 0)

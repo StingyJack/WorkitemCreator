@@ -5,6 +5,8 @@
 
     public class Config
     {
+        public const string CONFIG_FILE_NAME = "config.json";
+
         [JsonProperty(Order = 0)] public string ServiceUrl { get; set; }
         [JsonProperty(Order = 1)] public string LastSelectedTeamProject { get; set; }
 

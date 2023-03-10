@@ -452,7 +452,9 @@
             }
 
             var jsonned = JsonConvert.SerializeObject(updatedConfig, Formatting.Indented);
-            File.WriteAllText(".\\config.json", jsonned);
+            var backupFileName = $"config.bak.{DateTime.Now.ToFileTime()}.json";
+            File.Copy(Config.CONFIG_FILE_NAME, backupFileName, true );
+            File.WriteAllText(Config.CONFIG_FILE_NAME, jsonned);
             _config = updatedConfig;
             WriteStatus("Configuration written to disk");
         }
