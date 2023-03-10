@@ -1,31 +1,77 @@
 ﻿<UserControl x:Class="WorkitemCreator.WorkitemTemplateViewControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d" >
-    <Grid MinHeight="430" MinWidth="250">
+             mc:Ignorable="d">
+    <Grid MinHeight="430" MinWidth="250" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition MaxWidth="100" />
-            <ColumnDefinition/>
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="100"/>
-            <RowDefinition />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="100" />
+            <RowDefinition Height="*" />
+            <RowDefinition MaxHeight="30" />
         </Grid.RowDefinitions>
-        <Label Content="Name:" HorizontalAlignment="Right"  VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="TemplateName" Text="" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" MinWidth="200" Margin="3"/>
-        <Label Content="Title:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" x:Name="Title" Text="" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1" MinWidth="200" Margin="3"/>
-        <Label Content="Type:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0"/>
-        <ComboBox HorizontalAlignment="Stretch" x:Name="WorkitemType" Text="" VerticalAlignment="Center" Grid.Row="2" Grid.Column="1" MinWidth="100" Margin="3"/>
-        <Label Content="Description:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0"/>
-        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description"  Grid.Row="3" Grid.Column="1" MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
-        
-        <TabControl Name="WorkItemChildren" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" />
+
+        <Label Content="Name:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" />
+        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="TemplateName" Text=""
+                 VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" MinWidth="200" Margin="3" />
+
+        <Label Content="Title:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
+        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" x:Name="Title" Text="" VerticalAlignment="Center"
+                 Grid.Row="1" Grid.Column="1" MinWidth="200" Margin="3" />
+
+        <Label Content="Type:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" />
+        <ComboBox HorizontalAlignment="Stretch" x:Name="WorkitemType" Text="" VerticalAlignment="Center" Grid.Row="2"
+                  Grid.Column="1" MinWidth="100" Margin="3" SelectionChanged="WorkitemType_SelectionChanged" />
+
+        <Label Content="Area Path:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" />
+        <ComboBox HorizontalAlignment="Stretch" x:Name="AreaPath" Text="" SelectedValuePath="Key"
+                  DisplayMemberPath="Value" VerticalAlignment="Center" Grid.Row="3" Grid.Column="1" MinWidth="100"
+                  Margin="3" />
+
+        <Label Content="Iteration:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" />
+        <ComboBox HorizontalAlignment="Stretch" x:Name="IterationPath" SelectedValuePath="Key"
+                  DisplayMemberPath="Value" Text="" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"
+                  MinWidth="100" Margin="3" />
+
+        <Label Content="Description:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="5"
+               Grid.Column="0" />
+        <TextBox HorizontalAlignment="Stretch" TextWrapping="Wrap" Name="Description" Grid.Row="5" Grid.Column="1"
+                 MinWidth="200" VerticalAlignment="Stretch" Margin="3" />
+
+        <TabControl Name="Details" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+            <TabItem Name="AdditionalFieldsTabItem" Header="Additional Fields">
+                <StackPanel Orientation="Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MaxWidth="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="70" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Field Name" FontStyle="Italic" Grid.Column="0" />
+                        <Label Content="Field Value" FontStyle="Italic" Grid.Column="1" />
+                        <Label Content="Include" FontStyle="Italic" Grid.Column="2"
+                               ToolTip="When checked, this field value will be included when creating the work item" />
+                    </Grid>
+                    <ScrollViewer Height="Auto" CanContentScroll="True" HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Visible">
+                        <StackPanel Name="AdditionalFields" Orientation="Vertical" Height="300" MinHeight="200" />
+                    </ScrollViewer>
+
+                </StackPanel>
+            </TabItem>
+            <TabItem Name="WorkitemChildrenTabItem" Header="Child Workitems">
+                <TabControl Name="WorkItemChildren" />
+            </TabItem>
+        </TabControl>
 
 
     </Grid>

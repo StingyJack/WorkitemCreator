@@ -4,70 +4,145 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Workitem Creator" Height="640" Width="600" 
+        Title="Workitem Creator" Height="525" Width="600"
         Background="#E6E6E8 " FontFamily="TimesNewRoman" FontSize="14">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MaxWidth="20"/>
-            <ColumnDefinition/>
-            <ColumnDefinition MaxWidth="20"/>
+            <ColumnDefinition MaxWidth="20" />
+            <ColumnDefinition />
+            <ColumnDefinition MaxWidth="20" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="30" />
             <RowDefinition />
-            <RowDefinition MaxHeight="30"/>
-            <RowDefinition MaxHeight="30"/>
+            <RowDefinition MaxHeight="100" />
+            <RowDefinition MaxHeight="30" />
+            <RowDefinition MaxHeight="35" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
-            <Label Content="Service Url:" HorizontalAlignment="Left"  VerticalAlignment="Center" />
-            <TextBox Name="ServiceUrl"  VerticalAlignment="Center" Margin="3" MinWidth="300" />
-            <Button Name="ConnectToAzDo" Content="Connect to AzDO"  Click="ConnectToAzDo_Click" ToolTip="If you think this should be 'ADO' your noob is showing."></Button>
+            <Label Content="Service Url:" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBox Name="ServiceUrl" VerticalAlignment="Center" Margin="3" MinWidth="300" />
+            <Button Name="ConnectToAzDo" Content="Connect to AzDO" Click="ConnectToAzDo_Click"
+                    ToolTip="If you think this should be 'ADO' your noob is showing." />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
-            <Label Content="Select Collection:"/>
-            <ComboBox Name="TeamProjectCollectionList" MinWidth="150" IsEnabled="False" SelectionChanged="TeamProjectCollectionList_SelectionChanged"></ComboBox>
-            <Label Content="Select Project:"/>
-            <ComboBox Name="TeamProjectList" MinWidth="150" IsEnabled="False" SelectionChanged="TeamProjectList_SelectionChanged"></ComboBox>
+            <Label Content="Select Project:" />
+            <ComboBox Name="TeamProjectList" MinWidth="150" IsEnabled="False" DisplayMemberPath="Name"
+                      SelectionChanged="TeamProjectList_SelectionChanged" />
+            <Label Content="Select Team:" />
+            <ComboBox Name="TeamsList" MinWidth="150" IsEnabled="False" DisplayMemberPath="Name"
+                      SelectionChanged="TeamsList_SelectionChanged" />
         </StackPanel>
-        
-        <TabControl Grid.Row="3" Grid.Column="1" Name="WorkItemTemplates" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="4" Grid.Column="1">
-            <Button Name="CreateWorkitems" Content="Create Workitem(s)"  Click="CreateWorkitems_Click" IsEnabled="False"></Button>
-        </StackPanel>
-        <StatusBar Name="StatusBar" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="5">
+
+        <TabControl Grid.Row="3" Grid.Column="1" Name="WorkItemTemplates" IsEnabled="False" />
+        <ScrollViewer Grid.Row="4" Grid.Column="1">
+            <TextBlock Name="LogWindow" />
+        </ScrollViewer>
+        <Grid Grid.Row="5" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Name="AddTemplateSet" Content="Add Template Set" Click="AddTemplateSet_OnClick" Grid.Row="0"
+                    Grid.Column="0" IsEnabled="False" />
+            <Button Name="SaveConfig" Content="Save Config" Click="SaveConfig_OnClick" Grid.Row="0" Grid.Column="1"
+                    IsEnabled="False" />
+            <TextBox Name="NewTemplateSetName" Grid.Row="0" Grid.Column="1" Visibility="Collapsed" KeyDown="NewTemplateSetName_OnKeyDown" 
+                     FocusVisualStyle="{DynamicResource VisualFocus}"/>
+            <Button Name="CreateWorkitems" Content="Create Workitem(s)" Click="CreateWorkitems_Click" IsEnabled="False"
+                    Grid.Row="0" Grid.Column="2" />
+        </Grid>
+        <StatusBar Name="StatusBar" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="0"
+                   Grid.ColumnSpan="3" Grid.Row="6">
             <StatusBarItem MinWidth="50">
-                <Label Name="ConnectionState" Content="Not connected"></Label>
+                <Label Name="ConnectionState" Content="Not connected" />
             </StatusBarItem>
             <StatusBarItem HorizontalContentAlignment="Stretch">
-                <Label Name="LastMessage" Content="Please connect to Azure DevOps"></Label>
+                <Label Name="LastMessage" Content="Please connect to Azure DevOps" />
             </StatusBarItem>
 
         </StatusBar>
     </Grid>
     <Window.Resources>
-        <!-- This window style doesn't work -->
-        <!--<Style TargetType="Window">
-            <Setter Property="Background" Value="NavajoWhite" />
-            <Setter Property="FontFamily" Value="Calibri" />
-            <Setter Property="FontSize" Value="16" />
-        </Style>-->
+        <!--<SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFF" />
+        <SolidColorBrush x:Key="SolidBorderBrush" Color="#888" />
+        <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888" />
+        <SolidColorBrush x:Key="DisabledBorderBrush" Color="#AAA" />-->
+
         <Style TargetType="Label">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
-
         </Style>
-        <Style TargetType="TabControl">
+        <Style TargetType="{x:Type TabControl}">
+            <Setter Property="Margin" Value="0 10 0 10" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
             <Setter Property="Background" Value="#D6D1CD" />
+            <!--<Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="20" />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="TabPanelButton"
+                                        Command="{Binding TabPanelButtonClickCommand}"
+                                        Margin="0,0,0,0"
+                                        Content="+"
+                                        Grid.Column="1" />
+                                <TabPanel Name="HeaderPanel"
+                                          Grid.Column="0"
+                                          Panel.ZIndex="1"
+                                          Margin="0,0,4,-1"
+                                          IsItemsHost="True"
+                                          KeyboardNavigation.TabIndex="0"
+                                          Background="Transparent" />
+                            </Grid>
+            <Border Name="Border"
+                                    Grid.Row="1"
+                                    Background="{StaticResource WindowBackgroundBrush}"
+                                    BorderBrush="{StaticResource SolidBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    KeyboardNavigation.TabNavigation="Local"
+                                    KeyboardNavigation.DirectionalNavigation="Contained"
+                                    KeyboardNavigation.TabIndex="2">
+                                <ContentPresenter Name="PART_SelectedContentHost"
+                                                  Margin="4"
+                                                  ContentSource="SelectedContent" />
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}" />
+                                <Setter TargetName="Border" Property="BorderBrush"
+                                        Value="{StaticResource DisabledBorderBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>-->
 
         </Style>
         <Style TargetType="TextBox">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Background" Value="#E5ECE9" />
-
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Background" Value="#E5ECE9" />
         </Style>
         <Style TargetType="ComboBox">
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -75,7 +150,7 @@
             <Setter Property="Background" Value="#D6D1CD" />
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#564D4A"/>
+                    <Setter Property="Background" Value="#564D4A" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -84,6 +159,15 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="3" />
             <Setter Property="Padding" Value="3" />
+        </Style>
+        <Style x:Key="VisualFocus">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="-2" StrokeThickness="1" Stroke="Green"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 </Window>

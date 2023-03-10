@@ -1,37 +1,54 @@
 {
-  "ServiceUrl": "https://dev.azure.com/astanton1978Sandbox/",
+  "ServiceUrl": "http://andrewlap/DefaultCollection",
   "LastSelectedTeamProjectCollection": "",
   "LastSelectedTeamProject": "",
   "IncludeStoryNumberInTaskTitle": false,
   "Templates": [
     {
-      "Name": "Standard User Story",
-      "WorkitemType": "User Story",
-      "Title": "Add a feature",
-      "Description": "This is a standard user story with development and testing tasks",
+      "TemplateSetName": "Standard User Story",
+      "TemplateId": "eddbce71-0582-4d6c-827e-abadda0dfaa7",
+      "TemplateName": "T1 Story Template2",
+      "WorkItemType": "Task",
       "Children": [
         {
-          "Name": "Dev Task",
-          "WorkitemType": "Task",
-          "Title": "Development",
-          "Description": "Do the programming",
-          "Properties": {
-            "Activity": "Development",
-            "RemainingTime": "8"
-          }
+          "TemplateId": "1352e4db-5b0a-4677-a996-ac688cef07e7",
+          "TemplateName": "T1 Task Template 1"
         },
         {
-          "Name": "Test Task",
-          "WorkitemType": "Task",
-          "Title": "Testing",
-          "Description": "Do the testing",
-          "Properties": {
-            "Activity": "Testing",
-            "RemainingTime": "4"
-          }
+          "TemplateId": "64248f49-d71c-4679-ae3f-1bb6d2628139",
+          "TemplateName": "T1 Task Template 2"
         }
-      ],
-      "Properties": {}
+
+      ]
+
+      //"WorkitemType": "User Story",
+      //"Title": "Add a feature",
+      //"Description": "This is a standard user story with development and testing tasks",
+      //"Children": [
+      //  {
+      //    "Name": "Dev Task",
+      //    "WorkitemType": "Task",
+      //    "Title": "Development",
+      //    "Description": "Do the programming",
+      //    "AdditionalFields": {
+      //      "Activity": "Development",
+      //      "Remaining Time": "8"
+      //    }
+      //  },
+      //  {
+      //    "Name": "Test Task",
+      //    "WorkitemType": "Task",
+      //    "Title": "Testing",
+      //    "Description": "Do the testing",
+      //    "AdditionalFields": {
+      //      "Activity": "Testing",
+      //      "Remaining Time": "4"
+      //    }
+      //  }
+      //],
+      //"AdditionalFields": {
+      //  "Acceptance Criteria": "To 'boldligo'"
+      //}
     },
     {
       "Name": "DB Script only User Story",
@@ -46,7 +63,7 @@
           "Description": "Make the script",
           "Properties": {
             "Activity": "Development",
-            "RemainingTime": "3"
+            "Remaining Time": "3"
           }
         },
         {
@@ -56,7 +73,7 @@
           "Description": "Test the script",
           "Properties": {
             "Activity": "Testing",
-            "RemainingTime": "1"
+            "Remaining Time": "1"
           }
         },
         {
