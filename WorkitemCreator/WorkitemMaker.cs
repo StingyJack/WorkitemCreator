@@ -167,7 +167,8 @@
             return workitemCandidate;
         }
 
-        private static void ApplyFieldToCandidate(WorkItemType wiType, WorkitemCreationResult returnValue, KeyValuePair<string, object> wiField, JsonPatchDocument workitemCandidate)
+        private static void ApplyFieldToCandidate(WorkItemType wiType, WorkitemCreationResult returnValue, 
+            KeyValuePair<string, object> wiField, JsonPatchDocument workitemCandidate)
         {
             var field = wiType.Fields.FirstOrDefault(f => string.Equals(f.ReferenceName, wiField.Key, StringComparison.OrdinalIgnoreCase));
             if (field == null)
@@ -176,13 +177,14 @@
                 return;
             }
 
-            var existingPatchRecord = workitemCandidate.FirstOrDefault(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase));
+            var existingPatchRecord = workitemCandidate.SingleOrDefault(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase));
 
             if (existingPatchRecord != null)
             {
-                workitemCandidate.Remove(existingPatchRecord);
-                returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The previous value will be ignored");
-//                    continue;
+                returnValue.AddNonTermError($"Field {field.Name} has already been applied to this workitem once. The previous value '{existingPatchRecord.Value}' " +
+                                            $"will be replaced with the new value '{wiField.Value}'");
+                existingPatchRecord.Value = wiField.Value;
+                return;
             }
 
             var jpo = new JsonPatchOperation
@@ -191,7 +193,6 @@
                 Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
                 Value = wiField.Value
             };
-
 
             workitemCandidate.Add(jpo);
         }
