@@ -270,14 +270,9 @@
                 var witr = _localWitReferences.FirstOrDefault(w => w.Id.Equals(configuredTemplate.TemplateId));
                 if (witr == null)
                 {
-                    var deadTab = new TabItem
-                    {
-                        Header = configuredTemplate.TemplateSetName,
-                        Content = $"Configured template {configuredTemplate.TemplateSetName} parent ID was not found in the templates " +
-                                  "retrieved from the server.",
-                        IsEnabled = false
-                    };
-                    WorkItemTemplates.Items.Add(deadTab);
+                    WriteStatus($"Configured template {configuredTemplate.TemplateSetName} parent ID was not found in the templates " +
+                                   "retrieved from the server. If you save the config this template set will be lost.");
+
                     continue;
                 }
 
@@ -453,7 +448,7 @@
 
             var jsonned = JsonConvert.SerializeObject(updatedConfig, Formatting.Indented);
             var backupFileName = $"config.bak.{DateTime.Now.ToFileTime()}.json";
-            File.Copy(Config.CONFIG_FILE_NAME, backupFileName, true );
+            File.Copy(Config.CONFIG_FILE_NAME, backupFileName, true);
             File.WriteAllText(Config.CONFIG_FILE_NAME, jsonned);
             _config = updatedConfig;
             WriteStatus("Configuration written to disk");

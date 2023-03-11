@@ -1,11 +1,11 @@
 {
-  "ServiceUrl": "http://andrewlap/DefaultCollection",
+  "ServiceUrl": "http://localhost/DefaultCollection",
   "LastSelectedTeamProjectCollection": "",
   "LastSelectedTeamProject": "",
   "IncludeStoryNumberInTaskTitle": false,
   "Templates": [
     {
-      "TemplateSetName": "Standard User Story",
+      "TemplateSetName": "DB Data Fix",
       "TemplateId": "eddbce71-0582-4d6c-827e-abadda0dfaa7",
       "TemplateName": "T1 Story Template2",
       "WorkItemType": "Task",
@@ -18,76 +18,19 @@
           "TemplateId": "64248f49-d71c-4679-ae3f-1bb6d2628139",
           "TemplateName": "T1 Task Template 2"
         }
-
       ]
-
-      //"WorkitemType": "User Story",
-      //"Title": "Add a feature",
-      //"Description": "This is a standard user story with development and testing tasks",
-      //"Children": [
-      //  {
-      //    "Name": "Dev Task",
-      //    "WorkitemType": "Task",
-      //    "Title": "Development",
-      //    "Description": "Do the programming",
-      //    "AdditionalFields": {
-      //      "Activity": "Development",
-      //      "Remaining Time": "8"
-      //    }
-      //  },
-      //  {
-      //    "Name": "Test Task",
-      //    "WorkitemType": "Task",
-      //    "Title": "Testing",
-      //    "Description": "Do the testing",
-      //    "AdditionalFields": {
-      //      "Activity": "Testing",
-      //      "Remaining Time": "4"
-      //    }
-      //  }
-      //],
-      //"AdditionalFields": {
-      //  "Acceptance Criteria": "To 'boldligo'"
-      //}
     },
     {
-      "Name": "DB Script only User Story",
-      "WorkitemType": "User Story",
-      "Title": "Fix the data",
-      "Description": "This is a user story for a specific production data fix",
+      "TemplateSetName": "Regular Feature",
+      "TemplateId": "eddbce71-0582-4d6c-827e-abadda0dfaa7",
+      "TemplateName": "T1 Story Template2",
+      "WorkItemType": "Task",
       "Children": [
         {
-          "Name": "DBA Task",
-          "WorkitemType": "Task",
-          "Title": "Author the script",
-          "Description": "Make the script",
-          "Properties": {
-            "Activity": "Development",
-            "Remaining Time": "3"
-          }
-        },
-        {
-          "Name": "Test Task",
-          "WorkitemType": "Task",
-          "Title": "Testing",
-          "Description": "Test the script",
-          "Properties": {
-            "Activity": "Testing",
-            "Remaining Time": "1"
-          }
-        },
-        {
-          "Name": "Deploy Task",
-          "WorkitemType": "Task",
-          "Title": "Run the script",
-          "Description": "Execute the script",
-          "Properties": {
-            "Activity": "Deployment",
-            "RemainingTime": "1"
-          }
+          "TemplateId": "1352e4db-5b0a-4677-a996-ac688cef07e7",
+          "TemplateName": "T1 Task Template 1"
         }
-      ],
-      "Properties": {}
+      ]
     }
   ]
 }
