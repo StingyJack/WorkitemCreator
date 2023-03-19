@@ -154,7 +154,7 @@
             }
         }
 
-        private Dictionary<int, string> FlattenClassificationNodes(List<WorkItemClassificationNode> treeNodes, ref Dictionary<int, string> collectedNodes)
+        private static Dictionary<int, string> FlattenClassificationNodes(List<WorkItemClassificationNode> treeNodes, ref Dictionary<int, string> collectedNodes)
         {
             foreach (var tn in treeNodes)
             {
@@ -215,7 +215,7 @@
             }
         }
 
-        private static bool IsFieldPreventedFromBeingShownInAdditionalFields(WorkItemTypeFieldInstance wif)
+        private static bool IsFieldPreventedFromBeingShownInAdditionalFields(WorkItemFieldReference wif)
         {
             //TODO: this can be moved to configuration.
 

@@ -27,11 +27,5 @@
             Errors.Add(incoming.Errors);
             WorkitemsCreated.Add(incoming.Data);
         }
-
-        public void SetFail(string errorMessage)
-        {
-            IsOk = false;
-            Errors.Add(errorMessage);
-        }
     }
 }

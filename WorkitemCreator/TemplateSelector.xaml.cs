@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
+    using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 
     /// <summary>
     ///     Interaction logic for TemplateSelector.xaml
@@ -39,7 +40,7 @@
             }
         }
 
-        private void AddChildWorkitemTemplateUiControls(LocalWiTemplateReference existingConfiguredChildTemplate = null)
+        private void AddChildWorkitemTemplateUiControls(WorkItemTemplateReference existingConfiguredChildTemplate = null)
         {
             var insertionIndex = ChildTemplates.RowDefinitions.Count;
             ChildTemplates.RowDefinitions.Add(new RowDefinition());

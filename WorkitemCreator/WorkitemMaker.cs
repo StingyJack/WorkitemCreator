@@ -61,7 +61,7 @@
             return returnValue;
         }
 
-        private async Task<WorkitemCreationResult> CreateWorkitemFromTemplateAsync(WorkItemTemplateReference wiTemplateReference, List<WorkItemType> workItemTypes, string parentUrl = null)
+        private async Task<WorkitemCreationResult> CreateWorkitemFromTemplateAsync(WorkItemTemplateReference wiTemplateReference, IEnumerable<WorkItemType> workItemTypes, string parentUrl = null)
         {
             var returnValue = new WorkitemCreationResult();
             var workitemTemplateResult = await _azDoService.GetTeamWorkitemTemplateAsync(wiTemplateReference.Id);
@@ -118,7 +118,7 @@
                     throw new InvalidOperationException("Workitem was not created, Id is null.");
                 }
             }
-            catch (RuleValidationException rve)
+            catch (RuleValidationException rve) // want to do something different, not sure what yet
             {
                 returnValue.SetFail(rve.Message);
                 Trace.TraceError(rve.ToString());
@@ -142,7 +142,7 @@
             return returnValue;
         }
 
-        private JsonPatchDocument BuildWorkitemFromTemplate(WorkItem workitemFromTemplate, WorkItemTemplate wit, WorkItemType wiType, ref WorkitemCreationResult returnValue)
+        private static JsonPatchDocument BuildWorkitemFromTemplate(WorkItem workitemFromTemplate, WorkItemTemplate wit, WorkItemType wiType, ref WorkitemCreationResult returnValue)
         {
             var workitemCandidate = new JsonPatchDocument();
             foreach (var wiField in workitemFromTemplate.Fields)
@@ -161,13 +161,13 @@
             {
                 Operation = Operation.Add,
                 Path = "/fields/System.History",
-                Value = "Created with WorkitemCreator",
+                Value = "Created with WorkitemCreator"
             });
 
             return workitemCandidate;
         }
 
-        private static void ApplyFieldToCandidate(WorkItemType wiType, WorkitemCreationResult returnValue, 
+        private static void ApplyFieldToCandidate(WorkItemType wiType, WorkitemCreationResult returnValue,
             KeyValuePair<string, object> wiField, JsonPatchDocument workitemCandidate)
         {
             var field = wiType.Fields.FirstOrDefault(f => string.Equals(f.ReferenceName, wiField.Key, StringComparison.OrdinalIgnoreCase));
@@ -177,7 +177,8 @@
                 return;
             }
 
-            var existingPatchRecord = workitemCandidate.SingleOrDefault(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase));
+            var fieldPath = $"/fields/{field.ReferenceName}";
+            var existingPatchRecord = workitemCandidate.SingleOrDefault(j => j.Path.Equals(fieldPath, StringComparison.OrdinalIgnoreCase));
 
             if (existingPatchRecord != null)
             {
@@ -190,166 +191,11 @@
             var jpo = new JsonPatchOperation
             {
                 Operation = Operation.Add,
-                Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
+                Path = fieldPath, 
                 Value = wiField.Value
             };
 
             workitemCandidate.Add(jpo);
-        }
-
-        // ReSharper disable once UnusedMember.Global
-        public async Task<WorkitemsCreationResult> CreateWorkitemsRawAsync(WorkitemTemplate wit)
-        {
-            _ = wit ?? throw new ArgumentNullException(nameof(wit));
-
-            var returnValue = new WorkitemsCreationResult();
-
-            var workitemTypesResult = await _azDoService.GetWorkItemTypesAsync();
-            if (workitemTypesResult.IsOk == false)
-            {
-                returnValue.IsOk = false;
-                returnValue.Errors.Add(workitemTypesResult.Errors);
-                return returnValue;
-            }
-
-            var parentWiType = workitemTypesResult.Data.FirstOrDefault(p => string.Equals(wit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase));
-            if (parentWiType == null)
-            {
-                returnValue.SetFail($"The parent workitem type {wit.WorkitemType} does not exist for project {_azDoService.ProjectName}");
-                return returnValue;
-            }
-
-            //needs some status reporting/logging in here
-            returnValue.Logs.Add("Applying fields and values to  parent workitem candidate");
-            WorkItem parentWorkitem;
-
-
-            try
-            {
-                var parentWorkitemCandidate = ApplyFieldsAndValues(wit, parentWiType);
-                var parentWorkitemCreationResult = await _azDoService.CreateWorkitemAsync(parentWorkitemCandidate, wit.WorkitemType);
-                if (parentWorkitemCreationResult.IsOk == false)
-                {
-                    returnValue.SetFail(parentWorkitemCreationResult.Errors);
-                    return returnValue;
-                }
-
-                parentWorkitem = parentWorkitemCreationResult.Data;
-                if (parentWorkitem.Id.HasValue == false)
-                {
-                    throw new InvalidOperationException("Parent workitem was not created.");
-                }
-            }
-            catch (Exception e)
-            {
-                returnValue.SetFail(e.ToString());
-                Trace.TraceError(e.ToString());
-                return returnValue;
-            }
-
-            returnValue.WorkitemsCreated.Add(new WorkitemBaseDetails
-            {
-                Id = parentWorkitem.Id.Value,
-                WorkitemTypeName = wit.WorkitemType,
-                Uri = parentWorkitem.Url,
-                Title = wit.Title
-            });
-
-            foreach (var cwit in wit.Children)
-            {
-                var wiType = workitemTypesResult.Data.FirstOrDefault(p => string.Equals(cwit.WorkitemType, p.Name, StringComparison.OrdinalIgnoreCase));
-                if (wiType == null)
-                {
-                    returnValue.SetFail($"The child workitem type {cwit.WorkitemType} does not exist for project {_azDoService.ProjectName}");
-                    return returnValue;
-                }
-
-                var childWorkItemCandidate = ApplyFieldsAndValues(cwit, wiType);
-                var parentRelation = new JsonPatchOperation
-                {
-                    Operation = Operation.Add,
-                    Path = "/relations/-",
-                    Value = new
-                    {
-                        rel = "System.LinkTypes.Hierarchy-Reverse",
-                        url = parentWorkitem.Url
-                    }
-                };
-                childWorkItemCandidate.Add(parentRelation);
-
-                WorkItem childWorkitem;
-                try
-                {
-                    var childWorkitemCreationResult = await _azDoService.CreateWorkitemAsync(childWorkItemCandidate, cwit.WorkitemType);
-                    if (childWorkitemCreationResult.IsOk == false)
-                    {
-                        returnValue.SetFail(childWorkitemCreationResult.Errors);
-                        return returnValue;
-                    }
-
-                    childWorkitem = childWorkitemCreationResult.Data;
-                    if (childWorkitem.Id.HasValue == false)
-                    {
-                        throw new InvalidOperationException("Child workitem was not created.");
-                    }
-                }
-                catch (Exception e)
-                {
-                    returnValue.SetFail($"Error creating child workitem. {e.Message}");
-                    Trace.TraceError(e.ToString());
-                    return returnValue;
-                }
-
-                returnValue.WorkitemsCreated.Add(new WorkitemBaseDetails
-                {
-                    Id = childWorkitem.Id.Value,
-                    WorkitemTypeName = cwit.WorkitemType,
-                    Uri = childWorkitem.Url,
-                    Title = cwit.Title
-                });
-            } //next child
-
-            returnValue.IsOk = true;
-
-            return returnValue;
-        }
-
-        private static JsonPatchDocument ApplyFieldsAndValues(WorkitemTemplate wit, WorkItemType wiType)
-        {
-            var workitemCandidate = new JsonPatchDocument();
-            foreach (var item in wit.AsDictionary())
-            {
-                var field = wiType.Fields.FirstOrDefault(f => string.Equals(f.Name, item.Key, StringComparison.OrdinalIgnoreCase));
-                if (field == null)
-                {
-                    throw new InvalidOperationException($"Could not find a workitem field matching the name {item.Key}");
-                }
-
-                var jpo = new JsonPatchOperation
-                {
-                    Operation = Operation.Add,
-                    Path = $"/fields/{field.ReferenceName}", // should be like "/fields/System.Title"
-                    Value = item.Value
-                };
-
-                if (workitemCandidate.Any(j => j.Path.Equals(field.ReferenceName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new InvalidOperationException($"Field {field.Name} has already been applied to this workitem once. The value {item.Value} will be ignored");
-                }
-
-
-                workitemCandidate.Add(jpo);
-            }
-
-
-            workitemCandidate.Add(new JsonPatchOperation
-            {
-                Operation = Operation.Add,
-                Path = "/fields/System.History",
-                Value = "Created with WorkitemCreator",
-            });
-
-            return workitemCandidate;
         }
     }
 }
