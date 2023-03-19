@@ -2,12 +2,6 @@
   "version": 1,
   "dependencies": {
     ".NETFramework,Version=v4.8": {
-      "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers": {
-        "type": "Direct",
-        "requested": "[0.4.410601, )",
-        "resolved": "0.4.410601",
-        "contentHash": "ZFc3Pqiox/AcJECaYHXZtdB8XF12pJKvlrIxavL01z7VpW8Oy1d4tAgcnZfgburH5eVtAH4Bi2QKTHnN8va0ug=="
-      },
       "Microsoft.TeamFoundationServer.Client": {
         "type": "Direct",
         "requested": "[16.170.0, )",
@@ -103,9 +97,9 @@
       },
       "Newtonsoft.Json": {
         "type": "Direct",
-        "requested": "[13.0.2, )",
-        "resolved": "13.0.2",
-        "contentHash": "R2pZ3B0UjeyHShm9vG+Tu0EBb2lC8b0dFzV9gVn50ofHXh9Smjk6kTn7A/FdAsC8B5cKib1OnGYOXxRBz5XQDg=="
+        "requested": "[13.0.3, )",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
       "System.Data.SqlClient": {
         "type": "Direct",

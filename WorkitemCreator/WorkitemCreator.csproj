@@ -3,12 +3,18 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <!--<Nullable>disable</Nullable>-->
+    <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
     <!--<ProduceReferenceAssembly>False</ProduceReferenceAssembly>-->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
     <RestoreLockedMode>true</RestoreLockedMode>
+
+    <!--<SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>-->
+
+    <StartupObject>WorkitemCreator.App</StartupObject>
+
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -22,12 +28,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.410601" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.170.0" />
     <PackageReference Include="Microsoft.VisualStudio.Services.Client" Version="16.170.0" />
     <PackageReference Include="Microsoft.VisualStudio.Services.InteractiveClient" Version="16.170.0" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 

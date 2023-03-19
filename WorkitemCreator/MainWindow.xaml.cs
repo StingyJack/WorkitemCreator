@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Windows;
@@ -19,7 +18,6 @@
     /// <summary>
     ///     Interaction logic for MainWindow.xaml
     /// </summary>
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public partial class MainWindow
     {
         #region "fields and loading"
@@ -41,7 +39,7 @@
             WriteStatus("Loading templates from config");
             WorkItemTemplates.Items.Clear();
             ServiceUrl.Text = _config.ServiceUrl;
-            //foreach (var template in _config.Templates)
+            //foreach (var template in _config.TeamTemplates)
             //{
             //    var templateViewControl = new WorkitemTemplateViewControl(template);
             //    var childTab = new TabItem
@@ -141,6 +139,7 @@
 
         private async void ConnectToAzDo_Click(object sender, RoutedEventArgs e)
         {
+            ConnectToAzDo.IsEnabled = false;
             var serviceUrl = ServiceUrl.Text.Trim();
             WriteStatus($"Connecting to {serviceUrl} ...");
 
@@ -150,6 +149,7 @@
             if (connResult.IsConnected == false)
             {
                 WriteStatus($"Unable to connect. {connResult.ConnectionError}");
+                ConnectToAzDo.IsEnabled = true;
                 return;
             }
 
@@ -184,15 +184,6 @@
             _azDoService.ProjectName = selectedProject.Name;
             _azDoService.ProjectId = selectedProject.Id;
 
-            //WriteStatus($"Getting workitem types for project {_azDoService.ProjectName}...");
-            //var wiTypeResult = await _azDoService.GetWorkItemTypesAsync();
-            //if (wiTypeResult.IsOk == false)
-            //{
-            //    ReportError(wiTypeResult.Errors, $"Failed to get WorkItem types for project {_azDoService.ProjectName}.");
-            //    return;
-            //}
-
-            //WriteStatus($"Got {wiTypeResult.Data.Count} workitem types for project {_azDoService.ProjectName}");
 
             WriteStatus($"Getting teams for project {_azDoService.ProjectName}...");
             var teamsResult = await _azDoService.GetTeamsAsync();
@@ -203,41 +194,14 @@
             }
 
             TeamsList.ItemsSource = teamsResult.Data.OrderBy(t => t.Name);
+            if (string.IsNullOrWhiteSpace(_config.LastSelectedTeam) == false
+                && teamsResult.Data.Any(t => t.Name.Equals(_config.LastSelectedTeam)))
+            {
+                TeamsList.Text = _config.LastSelectedTeam;
+            }
+
             TeamsList.IsEnabled = true;
             WriteStatus($"Got {teamsResult.Data.Count} teams for project {_azDoService.ProjectName}");
-
-
-            //WriteStatus($"Getting iterations for project {_azDoService.ProjectName}...");
-            //var iterationsResult = await _azDoService.GetIterationsAsync();
-            //if (iterationsResult.IsOk == false)
-            //{
-            //    ReportError(iterationsResult.Errors, $"Failed to get iterations for project {_azDoService.ProjectName}.");
-            //    return;
-            //}
-
-            //WriteStatus($"Got {iterationsResult.Data.Count} iterations for project {_azDoService.ProjectName}");
-
-            //WriteStatus($"Getting area paths for project {_azDoService.ProjectName}...");
-            //var areaPathsResult = await _azDoService.GetAreaPathsAsync();
-            //if (areaPathsResult.IsOk == false)
-            //{
-            //    ReportError(areaPathsResult.Errors, $"Failed to get area paths for project {_azDoService.ProjectName}.");
-            //    return;
-            //}
-
-            //WriteStatus($"Got {areaPathsResult.Data.Count} area paths for project {_azDoService.ProjectName}");
-
-
-            //foreach (TabItem ti in WorkItemTemplates.Items)
-            //{
-            //    var witvc = ti.Content as WorkitemTemplateViewControl;
-            //    if (witvc == null)
-            //    {
-            //        continue;
-            //    }
-
-            //    witvc.UpdateWithProjectConfiguration(wiTypeResult.Data, iterationsResult.Data, areaPathsResult.Data);
-            //}
 
             if (TeamsList.SelectedIndex < 0 && TeamsList.Items.Count > 0)
             {
@@ -251,6 +215,7 @@
             {
                 SaveConfig.IsEnabled = false;
                 AddTemplateSet.IsEnabled = false;
+                CreateWorkitems.IsEnabled = false;
                 return;
             }
 
@@ -265,13 +230,16 @@
 
             _localWitReferences = BuildLocalWitReferences(teamTemplatesResult.Data);
 
-            foreach (var configuredTemplate in _config.Templates)
+            var currentTeamTemplates = _config.GetTeamTemplates(TeamsList.Text.Trim());
+            WorkItemTemplates.IsEnabled = false;
+            WorkItemTemplates.Items.Clear();
+            foreach (var configuredTemplate in currentTeamTemplates)
             {
                 var witr = _localWitReferences.FirstOrDefault(w => w.Id.Equals(configuredTemplate.TemplateId));
                 if (witr == null)
                 {
                     WriteStatus($"Configured template {configuredTemplate.TemplateSetName} parent ID was not found in the templates " +
-                                   "retrieved from the server. If you save the config this template set will be lost.");
+                                "retrieved from the server. If you save the config this template set will be lost.");
 
                     continue;
                 }
@@ -337,7 +305,6 @@
                 return;
             }
 
-            //MessageBox.Show(JsonConvert.SerializeObject(wiCreationResult, Formatting.Indented), "Workitem Creation Result");
             WriteStatus("Workitems Created!");
             foreach (var wi in wiCreationResult.WorkitemsCreated)
             {
@@ -397,14 +364,20 @@
 
         private void SaveConfig_OnClick(object sender, RoutedEventArgs e)
         {
+            var currentTeamSelection = TeamsList.Text.Trim();
+
             var updatedConfig = new Config
             {
                 ServiceUrl = ServiceUrl.Text.Trim(),
                 LastSelectedTeamProject = TeamProjectList.Text.Trim(),
-                Templates = new List<ConfiguredWitReference>(),
+                LastSelectedTeam = currentTeamSelection,
+                TeamTemplates = _config.TeamTemplates.Where(k => false == k.Key.Equals(currentTeamSelection, StringComparison.OrdinalIgnoreCase))
+                    .ToDictionary(k => k.Key, v => v.Value),
                 CurrentLogFilePath = _config.CurrentLogFilePath,
                 AzDoPat = _config.AzDoPat
             };
+            updatedConfig.TeamTemplates.Add(currentTeamSelection, new List<ConfiguredWitReference>());
+
             var currentIndex = 0;
             foreach (var rawTabItem in WorkItemTemplates.Items)
             {
@@ -417,8 +390,8 @@
                     continue;
                 }
 
-                var templateSetName = tabItem.Header.ToString();
-                if (string.IsNullOrEmpty(templateSetName))
+                var templateSetName = ((Label)((DockPanel)tabItem.Header).Children[0]).Content.ToString();
+                if (string.IsNullOrWhiteSpace(templateSetName))
                 {
                     ReportError($"Template Set at position {currentIndex} is missing a name and will be skipped.", "Cant save one of the template sets.");
                     continue;
@@ -439,11 +412,15 @@
                 };
                 foreach (var lwitKid in localWiTemplateReference.ChildTemplates)
                 {
-                    var configKid = new ConfiguredWitReference { TemplateId = lwitKid.Id };
+                    var configKid = new ConfiguredWitReference
+                    {
+                        TemplateId = lwitKid.Id,
+                        TemplateSetName = templateSetName
+                    };
                     configuredWitReference.Children.Add(configKid);
                 }
 
-                updatedConfig.Templates.Add(configuredWitReference);
+                updatedConfig.TeamTemplates[currentTeamSelection].Add(configuredWitReference);
             }
 
             var jsonned = JsonConvert.SerializeObject(updatedConfig, Formatting.Indented);
@@ -451,7 +428,7 @@
             File.Copy(Config.CONFIG_FILE_NAME, backupFileName, true);
             File.WriteAllText(Config.CONFIG_FILE_NAME, jsonned);
             _config = updatedConfig;
-            WriteStatus("Configuration written to disk");
+            WriteStatus("Prior configuration backed up and new configuration written to disk");
         }
 
         #endregion //#region "event handlers"
